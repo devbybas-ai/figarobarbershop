@@ -102,7 +102,9 @@ async function main() {
     },
   ];
 
-  // Clear existing barber schedules and barbers for clean re-seed
+  // Clear existing data for clean re-seed (order matters for foreign keys)
+  await prisma.appointmentItem.deleteMany();
+  await prisma.appointment.deleteMany();
   await prisma.barberSchedule.deleteMany();
   await prisma.barber.deleteMany();
 

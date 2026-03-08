@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 
 interface Barber {
@@ -93,17 +93,49 @@ export default function BookPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date, selectedBarber]);
 
-  function toggleService(id: string) {
-    setSelectedServices((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
-    );
-  }
-
   const selectedServiceObjects = services.filter((s) => selectedServices.includes(s.id));
   const totalPrice = selectedServiceObjects.reduce((sum, s) => sum + Number(s.price), 0);
   const totalDuration = selectedServiceObjects.reduce((sum, s) => sum + s.durationMinutes, 0);
   const categories = [...new Set(services.map((s) => s.category))];
   const selectedBarberObj = barbers.find((b) => b.id === selectedBarber);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
+
+  // Auto-switch active category tab when scrolling
+  const isManualScroll = useRef(false);
+  useEffect(() => {
+    if (step !== 0 || categories.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isManualScroll.current) return;
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const cat = entry.target.id.replace("cat-", "");
+            setActiveCategory(cat);
+          }
+        }
+      },
+      { rootMargin: "-120px 0px -60% 0px", threshold: 0 },
+    );
+
+    const timer = setTimeout(() => {
+      for (const cat of categories) {
+        const el = document.getElementById(`cat-${cat}`);
+        if (el) observer.observe(el);
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [step, categories]);
+
+  function toggleService(id: string) {
+    setSelectedServices((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
+    );
+  }
 
   const CATEGORY_LABELS: Record<string, string> = {
     HAIRCUT: "Haircut",
@@ -252,7 +284,71 @@ export default function BookPage() {
           ))}
         </nav>
 
-        <div className="mt-8 flex flex-col gap-8 lg:flex-row">
+        {/* Mobile Cart Summary Bar */}
+        <div className="mt-4 lg:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileCartOpen(!mobileCartOpen)}
+            className="flex w-full items-center justify-between rounded-lg border border-figaro-black/10 bg-white px-4 py-3"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-figaro-dark text-sm font-bold text-figaro-cream">
+                {selectedServices.length}
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-figaro-black">
+                  {selectedServices.length === 0
+                    ? "No services selected"
+                    : `${selectedServices.length} service${selectedServices.length > 1 ? "s" : ""}`}
+                </p>
+                {totalPrice > 0 && (
+                  <p className="text-xs text-figaro-black/50">
+                    ${totalPrice} &middot; {formatDuration(totalDuration)}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {canContinue() && (
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (step === 3) handleSubmit();
+                    else setStep(step + 1);
+                  }}
+                  className="rounded-full bg-figaro-dark px-4 py-1.5 text-sm font-semibold text-white"
+                >
+                  {step === 3 ? "Book" : "Continue"}
+                </span>
+              )}
+              <svg
+                className={`h-5 w-5 text-figaro-black/40 transition-transform ${mobileCartOpen ? "rotate-180" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+            </div>
+          </button>
+
+          {/* Expandable mobile cart details */}
+          {mobileCartOpen && selectedServiceObjects.length > 0 && (
+            <div className="mt-1 rounded-lg border border-figaro-black/10 bg-white px-4 py-3">
+              <div className="space-y-2">
+                {selectedServiceObjects.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between text-sm">
+                    <span className="text-figaro-black">{s.name}</span>
+                    <span className="text-figaro-black/60">${Number(s.price)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 flex flex-col gap-8 lg:mt-8 lg:flex-row">
           {/* Main Content */}
           <div className="flex-1">
             {/* Step 0: Services */}
@@ -264,29 +360,34 @@ export default function BookPage() {
               >
                 <h1 className="text-3xl font-bold text-figaro-black">Services</h1>
 
-                {/* Category Filter Tabs */}
-                <div className="mt-6 flex gap-2">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setActiveCategory(cat)}
-                      className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-                        activeCategory === cat
-                          ? "bg-figaro-black text-white"
-                          : "bg-figaro-black/5 text-figaro-black hover:bg-figaro-black/10"
-                      }`}
-                    >
-                      {CATEGORY_LABELS[cat] ?? cat}
-                    </button>
-                  ))}
+                {/* Category Filter Tabs (scroll to section) */}
+                <div className="sticky top-16 z-10 -mx-4 bg-figaro-cream px-4 pb-4 pt-2 sm:-mx-0 sm:px-0">
+                  <div className="flex gap-2">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          isManualScroll.current = true;
+                          setActiveCategory(cat);
+                          document.getElementById(`cat-${cat}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          setTimeout(() => { isManualScroll.current = false; }, 800);
+                        }}
+                        className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+                          activeCategory === cat
+                            ? "bg-figaro-black text-white"
+                            : "bg-figaro-black/5 text-figaro-black hover:bg-figaro-black/10"
+                        }`}
+                      >
+                        {CATEGORY_LABELS[cat] ?? cat}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Service Cards by Category */}
-                {categories
-                  .filter((cat) => cat === activeCategory)
-                  .map((cat) => (
-                    <div key={cat} className="mt-8">
+                {/* Service Cards — All Categories */}
+                {categories.map((cat) => (
+                    <div key={cat} id={`cat-${cat}`} className="mt-8 scroll-mt-28">
                       <h2 className="text-xl font-bold text-figaro-black">
                         {CATEGORY_LABELS[cat] ?? cat}
                       </h2>
@@ -547,8 +648,8 @@ export default function BookPage() {
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="w-full lg:w-80">
+          {/* Sidebar (desktop only — mobile uses compact cart bar above) */}
+          <div className="hidden w-full lg:block lg:w-80">
             <div className="sticky top-24 rounded-lg border border-figaro-black/10 bg-white p-6">
               {/* Shop Info */}
               <div className="flex items-center gap-3">
