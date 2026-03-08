@@ -1,0 +1,55 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { db } from "@/lib/db";
+import { z } from "zod/v4";
+
+const createClientSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.email().optional(),
+  phone: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const search = searchParams.get("search");
+
+  const where: Record<string, unknown> = { deletedAt: null };
+
+  if (search) {
+    where.OR = [
+      { firstName: { contains: search, mode: "insensitive" } },
+      { lastName: { contains: search, mode: "insensitive" } },
+      { email: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  const clients = await db.client.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    include: {
+      _count: { select: { appointments: true } },
+    },
+  });
+
+  return NextResponse.json(clients);
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body: unknown = await request.json();
+    const data = createClientSchema.parse(body);
+
+    const client = await db.client.create({ data });
+    return NextResponse.json(client, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.issues },
+        { status: 400 },
+      );
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

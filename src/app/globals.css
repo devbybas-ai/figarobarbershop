@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --figaro-gold: #c9a84c;
+  --figaro-gold-light: #d4b96a;
+  --figaro-black: #1a1a1a;
+  --figaro-cream: #f5f0e8;
+  --figaro-teal: #5ba5a5;
+  --figaro-teal-dark: #3d7a7a;
+  --figaro-teal-light: #7bc4c4;
+  --figaro-dark: #0d0d0d;
+
+  --background: #f5f0e8;
+  --foreground: #1a1a1a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-figaro-gold: var(--figaro-gold);
+  --color-figaro-gold-light: var(--figaro-gold-light);
+  --color-figaro-black: var(--figaro-black);
+  --color-figaro-cream: var(--figaro-cream);
+  --color-figaro-teal: var(--figaro-teal);
+  --color-figaro-teal-dark: var(--figaro-teal-dark);
+  --color-figaro-teal-light: var(--figaro-teal-light);
+  --color-figaro-dark: var(--figaro-dark);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0d0d0d;
+    --foreground: #f5f0e8;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Custom scrollbar for gallery strips */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Auto-scrolling marquee for gallery strip */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

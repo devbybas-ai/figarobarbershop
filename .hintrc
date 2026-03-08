@@ -1,0 +1,9 @@
+{
+  "hints": {
+    "no-inline-styles": "off"
+  },
+  "ignoredUrls": [],
+  "connector": {
+    "name": "local"
+  }
+}

@@ -1,0 +1,318 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// === AUTH (NextAuth) ===
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          UserRole  @default(STAFF)
+  accounts      Account[]
+  sessions      Session[]
+  barber        Barber?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@map("verification_tokens")
+}
+
+// === ROLES ===
+
+enum UserRole {
+  OWNER
+  BARBER
+  RECEPTIONIST
+  STAFF
+}
+
+// === BARBERS & STYLISTS ===
+
+model Barber {
+  id              String           @id @default(cuid())
+  userId          String?          @unique
+  user            User?            @relation(fields: [userId], references: [id])
+  firstName       String
+  lastName        String
+  phone           String?
+  bio             String?
+  imageUrl        String?
+  instagram       String?
+  facebook        String?
+  tiktok          String?
+  commissionRate  Decimal          @default(0) @db.Decimal(5, 2)
+  isActive        Boolean          @default(true)
+  appointments    Appointment[]
+  schedules       BarberSchedule[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("barbers")
+}
+
+model BarberSchedule {
+  id        String   @id @default(cuid())
+  barberId  String
+  barber    Barber   @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isOff     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([barberId, dayOfWeek])
+  @@map("barber_schedules")
+}
+
+// === CLIENTS ===
+
+model Client {
+  id              String         @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String?        @unique
+  phone           String?
+  intakeCompleted Boolean        @default(false)
+  intakeData      Json?
+  notes           String?
+  appointments    Appointment[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  @@map("clients")
+}
+
+// === SERVICES ===
+
+model Service {
+  id               String            @id @default(cuid())
+  name             String
+  description      String?
+  category         ServiceCategory
+  durationMinutes  Int
+  price            Decimal           @db.Decimal(10, 2)
+  isActive         Boolean           @default(true)
+  appointmentItems AppointmentItem[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@map("services")
+}
+
+enum ServiceCategory {
+  HAIRCUT
+  BEARD
+  SHAVE
+  COMBO
+  OTHER
+}
+
+// === APPOINTMENTS ===
+
+model Appointment {
+  id              String            @id @default(cuid())
+  clientId        String
+  client          Client            @relation(fields: [clientId], references: [id])
+  barberId        String
+  barber          Barber            @relation(fields: [barberId], references: [id])
+  status          AppointmentStatus @default(SCHEDULED)
+  type            AppointmentType   @default(BOOKED)
+  scheduledAt     DateTime
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  notes           String?
+  totalPrice      Decimal?          @db.Decimal(10, 2)
+  items           AppointmentItem[]
+  payment         Payment?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@map("appointments")
+}
+
+model AppointmentItem {
+  id            String      @id @default(cuid())
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  serviceId     String
+  service       Service     @relation(fields: [serviceId], references: [id])
+  price         Decimal     @db.Decimal(10, 2)
+
+  @@map("appointment_items")
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentType {
+  BOOKED
+  WALK_IN
+}
+
+// === PAYMENTS ===
+
+model Payment {
+  id              String        @id @default(cuid())
+  appointmentId   String        @unique
+  appointment     Appointment   @relation(fields: [appointmentId], references: [id])
+  amount          Decimal       @db.Decimal(10, 2)
+  method          PaymentMethod
+  stripePaymentId String?
+  status          PaymentStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  STRIPE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  FAILED
+}
+
+// === INVENTORY ===
+
+model Product {
+  id              String           @id @default(cuid())
+  name            String
+  description     String?
+  sku             String?          @unique
+  price           Decimal          @db.Decimal(10, 2)
+  costPrice       Decimal?         @db.Decimal(10, 2)
+  imageUrl        String?
+  isForSale       Boolean          @default(false)
+  inventoryItems  InventoryItem[]
+  orderItems      OrderItem[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("products")
+}
+
+model InventoryItem {
+  id            String   @id @default(cuid())
+  productId     String   @unique
+  product       Product  @relation(fields: [productId], references: [id])
+  quantity      Int      @default(0)
+  reorderLevel  Int      @default(5)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("inventory_items")
+}
+
+// === PRODUCT SHOP ORDERS ===
+
+model Order {
+  id              String      @id @default(cuid())
+  customerEmail   String
+  customerName    String
+  status          OrderStatus @default(PENDING)
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  stripePaymentId String?
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  FULFILLED
+  CANCELLED
+  REFUNDED
+}
+
+// === SHOP SETTINGS ===
+
+model ShopSettings {
+  id        String   @id @default("default")
+  shopName  String   @default("Figaro Barbershop Leucadia")
+  phone     String?
+  email     String?
+  address   String?
+  city      String?
+  state     String?
+  zip       String?
+  timezone  String   @default("America/Los_Angeles")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("shop_settings")
+}
