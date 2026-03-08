@@ -2,11 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 
-interface TimeSlot {
-  time: string;
-  available: boolean;
-}
-
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const date = searchParams.get("date");
@@ -18,8 +13,15 @@ export async function GET(request: NextRequest) {
   }
 
   const duration = durationStr ? parseInt(durationStr, 10) : 30;
-  const requestedDate = new Date(date);
-  const dayOfWeek = requestedDate.getDay() === 0 ? 7 : requestedDate.getDay();
+
+  // Parse date parts to avoid timezone issues with new Date("YYYY-MM-DD")
+  const [yearStr, monthStr, dayStr] = date.split("-");
+  const year = parseInt(yearStr ?? "0", 10);
+  const month = parseInt(monthStr ?? "0", 10) - 1;
+  const day = parseInt(dayStr ?? "0", 10);
+  const requestedDate = new Date(year, month, day);
+  const jsDay = requestedDate.getDay(); // 0=Sun, 1=Mon, ...
+  const dayOfWeek = jsDay === 0 ? 7 : jsDay; // DB uses 1=Mon, 7=Sun
 
   // Get barber schedule for this day
   const schedule = await db.barberSchedule.findUnique({
@@ -27,14 +29,12 @@ export async function GET(request: NextRequest) {
   });
 
   if (!schedule || schedule.isOff) {
-    return NextResponse.json({ slots: [], message: "Barber is off this day" });
+    return NextResponse.json({ availableSlots: [] });
   }
 
   // Get existing appointments for the barber on this date
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(date);
-  endOfDay.setDate(endOfDay.getDate() + 1);
+  const startOfDay = new Date(year, month, day, 0, 0, 0, 0);
+  const endOfDay = new Date(year, month, day + 1, 0, 0, 0, 0);
 
   const existingAppointments = await db.appointment.findMany({
     where: {
@@ -61,13 +61,10 @@ export async function GET(request: NextRequest) {
   const endHour = endParts[0] ?? 0;
   const endMin = endParts[1] ?? 0;
 
-  const slotStart = new Date(date);
-  slotStart.setHours(startHour, startMin, 0, 0);
+  const slotStart = new Date(year, month, day, startHour, startMin, 0, 0);
+  const scheduleEnd = new Date(year, month, day, endHour, endMin, 0, 0);
 
-  const scheduleEnd = new Date(date);
-  scheduleEnd.setHours(endHour, endMin, 0, 0);
-
-  const slots: TimeSlot[] = [];
+  const availableSlots: string[] = [];
   const now = new Date();
 
   while (slotStart.getTime() + duration * 60 * 1000 <= scheduleEnd.getTime()) {
@@ -81,13 +78,15 @@ export async function GET(request: NextRequest) {
       (range) => slotStart.getTime() < range.end && slotEnd > range.start,
     );
 
-    slots.push({
-      time: slotStart.toISOString(),
-      available: !isPast && !isBooked,
-    });
+    if (!isPast && !isBooked) {
+      // Return "HH:MM" format as the frontend expects
+      const hh = String(slotStart.getHours()).padStart(2, "0");
+      const mm = String(slotStart.getMinutes()).padStart(2, "0");
+      availableSlots.push(`${hh}:${mm}`);
+    }
 
     slotStart.setMinutes(slotStart.getMinutes() + 30);
   }
 
-  return NextResponse.json({ slots });
+  return NextResponse.json({ availableSlots });
 }

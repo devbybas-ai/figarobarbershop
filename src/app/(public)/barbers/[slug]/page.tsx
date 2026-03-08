@@ -60,12 +60,12 @@ const BARBER_TAGLINES: Record<string, string> = {
 };
 
 const HERO_BACKGROUNDS: Record<string, string> = {
-  ricardo: "/images/gallery/6c589953-56af-403e-b1f6-02b6eb426647.avif",
-  zeke: "/images/gallery/7c7d91cb-f064-43c2-9971-4515c62e4189.avif",
-  bryam: "/images/gallery/a916a539-0c33-4c72-ab72-034f0b11f258.avif",
-  johnny: "/images/gallery/1654c0b0-a1f1-4298-af53-59386abe46ff.avif",
-  david: "/images/gallery/52b328c2-c7b6-48f5-91e7-4f6d1e2b813a.avif",
-  austin: "/images/gallery/a99085dd-7ea7-4752-a775-96e2b4c5f99c.avif",
+  ricardo: "/images/gallery/0f0eafba-ce21-40b2-9249-3267e20a9258.avif",
+  zeke: "/images/gallery/b8ee786a-35ef-42bb-aaec-7024eed7ff0d.avif",
+  bryam: "/images/gallery/c2416687-39d6-452d-bb63-f36b13392fb6.avif",
+  johnny: "/images/gallery/0bc39962-fbe1-4e8f-b0d6-39d9e2068115.avif",
+  david: "/images/gallery/7ac62a21-d603-44af-b2c9-2efb751c2b7e.avif",
+  austin: "/images/gallery/73245090-d1c9-498f-b124-21345a191ea9.avif",
 };
 
 const PORTFOLIO_MAP: Record<string, string[]> = {
@@ -198,13 +198,13 @@ export default function BarberProfilePage({ params }: { params: Promise<{ slug: 
             <img
               src={heroBg}
               alt=""
-              className="h-full w-full object-cover opacity-15"
+              className="h-full w-full object-cover opacity-30"
               aria-hidden="true"
             />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-figaro-dark via-figaro-dark/60 to-figaro-dark/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-figaro-dark via-figaro-dark/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-figaro-dark via-figaro-dark/30 to-figaro-dark/15" />
+        <div className="absolute inset-0 bg-gradient-to-r from-figaro-dark via-figaro-dark/20 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-figaro-teal via-figaro-gold to-figaro-teal" />
 
         <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-16 pt-32 sm:px-6 lg:px-8">

@@ -40,6 +40,7 @@ export default function BookPage() {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("");
   const [date, setDate] = useState("");
+  const [datePageStart, setDatePageStart] = useState(0);
   const [time, setTime] = useState("");
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -268,7 +269,12 @@ export default function BookPage() {
               )}
               <button
                 type="button"
-                onClick={() => i < step && setStep(i)}
+                onClick={() => {
+                  if (i < step) {
+                    setStep(i);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }}
                 disabled={i > step}
                 className={`transition-colors ${
                   i === step
@@ -326,7 +332,10 @@ export default function BookPage() {
                   type="button"
                   onClick={() => {
                     if (step === 3) handleSubmit();
-                    else setStep(step + 1);
+                    else {
+                      setStep(step + 1);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
                   }}
                   className="flex-shrink-0 rounded-full bg-figaro-dark px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-figaro-black"
                 >
@@ -534,14 +543,48 @@ export default function BookPage() {
 
                 {/* Date Picker */}
                 <div className="mt-6">
-                  <h2 className="text-sm font-medium text-figaro-black/70">Date</h2>
-                  <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-                    {dateOptions.map((d) => (
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-medium text-figaro-black/70">Date</h2>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setDatePageStart(Math.max(0, datePageStart - 7))}
+                        disabled={datePageStart === 0}
+                        className={`rounded-lg border p-2 transition-all ${
+                          datePageStart === 0
+                            ? "cursor-not-allowed border-figaro-black/5 text-figaro-black/20"
+                            : "border-figaro-black/10 text-figaro-black/60 hover:border-figaro-black/20 hover:text-figaro-black"
+                        }`}
+                        aria-label="Previous week"
+                      >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDatePageStart(Math.min(dateOptions.length - 7, datePageStart + 7))}
+                        disabled={datePageStart + 7 >= dateOptions.length}
+                        className={`rounded-lg border p-2 transition-all ${
+                          datePageStart + 7 >= dateOptions.length
+                            ? "cursor-not-allowed border-figaro-black/5 text-figaro-black/20"
+                            : "border-figaro-black/10 text-figaro-black/60 hover:border-figaro-black/20 hover:text-figaro-black"
+                        }`}
+                        aria-label="Next week"
+                      >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mt-3 grid grid-cols-7 gap-2">
+                    {dateOptions.slice(datePageStart, datePageStart + 7).map((d) => (
                       <button
                         key={d.value}
                         type="button"
                         onClick={() => setDate(d.value)}
-                        className={`flex flex-shrink-0 flex-col items-center rounded-lg border px-4 py-3 transition-all ${
+                        className={`flex flex-col items-center rounded-lg border px-2 py-3 transition-all ${
                           date === d.value
                             ? "border-figaro-gold bg-figaro-gold text-figaro-dark"
                             : "border-figaro-black/10 bg-white text-figaro-black hover:border-figaro-black/20"
@@ -757,6 +800,7 @@ export default function BookPage() {
                     handleSubmit();
                   } else {
                     setStep(step + 1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
                   }
                 }}
                 className={`mt-5 w-full rounded-full py-3.5 text-center font-semibold transition-all ${
@@ -776,7 +820,10 @@ export default function BookPage() {
               {step > 0 && (
                 <button
                   type="button"
-                  onClick={() => setStep(step - 1)}
+                  onClick={() => {
+                    setStep(step - 1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
                   className="mt-2 w-full py-2 text-center text-sm text-figaro-black/50 transition-colors hover:text-figaro-black"
                 >
                   Back

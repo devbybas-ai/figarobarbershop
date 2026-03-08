@@ -59,7 +59,7 @@ export default function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-figaro-dark">
+      <section className="relative flex min-h-[90vh] items-start pt-24 overflow-hidden bg-figaro-dark sm:items-center sm:pt-0">
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
@@ -125,7 +125,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/book"
-                className="rounded-sm border border-figaro-teal/50 bg-transparent px-8 py-3.5 text-base font-semibold text-figaro-teal transition-all duration-300 hover:border-figaro-teal hover:bg-figaro-teal hover:text-white hover:shadow-lg hover:shadow-figaro-teal/25"
+                className="rounded-sm border border-figaro-teal bg-figaro-teal px-8 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:bg-figaro-teal-dark hover:shadow-lg hover:shadow-figaro-teal/25 sm:border-figaro-teal/50 sm:bg-transparent sm:text-figaro-teal sm:hover:border-figaro-teal sm:hover:bg-figaro-teal sm:hover:text-white"
               >
                 Book Your Cut
               </Link>
