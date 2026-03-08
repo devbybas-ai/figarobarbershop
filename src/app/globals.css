@@ -68,3 +68,17 @@ body {
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+/* Horizontal bounce arrow for CTA hint */
+@keyframes bounce-x {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-bounce-x {
+  animation: bounce-x 1.5s ease-in-out infinite;
+}

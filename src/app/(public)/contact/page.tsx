@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -108,6 +109,21 @@ export default function ContactPage() {
                   </a>
                 </div>
               </address>
+
+              <div className="mt-6 flex flex-col gap-3 border-t border-figaro-black/10 pt-6 sm:flex-row">
+                <Link
+                  href="/book"
+                  className="inline-block rounded-sm bg-figaro-gold px-5 py-2.5 text-center text-sm font-semibold text-figaro-dark transition-colors hover:bg-figaro-gold-light"
+                >
+                  Book Now
+                </Link>
+                <Link
+                  href="/barbers"
+                  className="inline-block rounded-sm border border-figaro-teal px-5 py-2.5 text-center text-sm font-semibold text-figaro-teal transition-colors hover:bg-figaro-teal/10"
+                >
+                  Meet Our Crew
+                </Link>
+              </div>
             </div>
 
             {/* Hours */}

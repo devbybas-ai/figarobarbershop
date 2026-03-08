@@ -248,7 +248,7 @@ export default function BookPage() {
   }
 
   return (
-    <section className="min-h-screen bg-figaro-cream pb-24 lg:pb-0">
+    <section className="min-h-screen bg-figaro-cream">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb Steps */}
         <nav className="flex items-center gap-2 text-sm" aria-label="Booking steps">
@@ -284,31 +284,10 @@ export default function BookPage() {
           ))}
         </nav>
 
-        {/* Mobile Floating Cart Bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
-          {/* Expandable cart details (slides up above the bar) */}
-          {mobileCartOpen && selectedServiceObjects.length > 0 && (
-            <div className="mx-4 mb-2 rounded-xl border border-figaro-black/10 bg-white px-5 py-4 shadow-lg">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-semibold text-figaro-black">Your Services</p>
-                <p className="text-sm font-semibold text-figaro-black">${totalPrice}</p>
-              </div>
-              <div className="space-y-3">
-                {selectedServiceObjects.map((s) => (
-                  <div key={s.id} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-figaro-black">{s.name}</p>
-                      <p className="text-xs text-figaro-black/40">{formatDuration(s.durationMinutes)}</p>
-                    </div>
-                    <p className="text-sm text-figaro-black/60">${Number(s.price)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Sticky bottom bar */}
-          <div className="border-t border-figaro-black/10 bg-white px-5 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        {/* Mobile Sticky Top Cart Bar */}
+        <div className="sticky top-[3.6rem] z-30 mt-6 lg:hidden">
+          {/* Top bar */}
+          <div className="-mx-4 border-b border-figaro-black/10 bg-white px-5 pb-4 pt-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between gap-4">
               <button
                 type="button"
@@ -318,14 +297,14 @@ export default function BookPage() {
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-figaro-dark text-sm font-bold text-figaro-cream">
                   {selectedServices.length}
                 </div>
-                <div className="min-w-0 text-left">
-                  <p className="text-sm font-semibold text-figaro-black">
+                <div className="flex min-w-0 flex-col justify-center text-left">
+                  <p className="text-sm font-semibold leading-tight text-figaro-black">
                     {selectedServices.length === 0
                       ? "No services selected"
                       : `${selectedServices.length} service${selectedServices.length > 1 ? "s" : ""}`}
                   </p>
                   {totalPrice > 0 && (
-                    <p className="text-xs text-figaro-black/50">
+                    <p className="mt-0.5 text-xs leading-tight text-figaro-black/50">
                       ${totalPrice} &middot; {formatDuration(totalDuration)}
                     </p>
                   )}
@@ -338,7 +317,7 @@ export default function BookPage() {
                     strokeWidth={2}
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                   </svg>
                 )}
               </button>
@@ -360,6 +339,27 @@ export default function BookPage() {
               )}
             </div>
           </div>
+
+          {/* Expandable cart details (drops down below the bar) */}
+          {mobileCartOpen && selectedServiceObjects.length > 0 && (
+            <div className="mx-4 mt-2 rounded-xl border border-figaro-black/10 bg-white px-5 py-4 shadow-lg">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-sm font-semibold text-figaro-black">Your Services</p>
+                <p className="text-sm font-semibold text-figaro-black">${totalPrice}</p>
+              </div>
+              <div className="space-y-3">
+                {selectedServiceObjects.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-figaro-black">{s.name}</p>
+                      <p className="text-xs text-figaro-black/40">{formatDuration(s.durationMinutes)}</p>
+                    </div>
+                    <p className="text-sm text-figaro-black/60">${Number(s.price)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-4 flex flex-col gap-8 lg:mt-8 lg:flex-row">
@@ -375,7 +375,7 @@ export default function BookPage() {
                 <h1 className="text-3xl font-bold text-figaro-black">Services</h1>
 
                 {/* Category Filter Tabs (scroll to section) */}
-                <div className="sticky top-14 z-10 -mx-4 bg-figaro-cream px-4 pb-3 pt-5 sm:top-16 sm:-mx-0 sm:px-0 sm:pt-4">
+                <div className="sticky top-[8.1rem] z-10 -mx-4 bg-figaro-cream px-4 pb-4 pt-5 sm:top-16 sm:-mx-0 sm:px-0 sm:pt-4 lg:top-16">
                   <div className="flex gap-2">
                     {categories.map((cat) => (
                       <button
@@ -401,11 +401,11 @@ export default function BookPage() {
 
                 {/* Service Cards — All Categories */}
                 {categories.map((cat) => (
-                    <div key={cat} id={`cat-${cat}`} className="mt-8 scroll-mt-28">
+                    <div key={cat} id={`cat-${cat}`} className="mt-10 scroll-mt-[12rem] sm:scroll-mt-28">
                       <h2 className="text-xl font-bold text-figaro-black">
                         {CATEGORY_LABELS[cat] ?? cat}
                       </h2>
-                      <div className="mt-4 space-y-4">
+                      <div className="mt-5 space-y-5">
                         {services
                           .filter((s) => s.category === cat)
                           .map((service) => {
@@ -413,7 +413,7 @@ export default function BookPage() {
                             return (
                               <div
                                 key={service.id}
-                                className={`flex items-start justify-between rounded-lg border bg-white p-5 transition-all ${
+                                className={`flex items-start justify-between rounded-lg border bg-white p-6 transition-all ${
                                   isSelected
                                     ? "border-figaro-gold shadow-sm"
                                     : "border-figaro-black/10 hover:border-figaro-black/20"
@@ -429,7 +429,7 @@ export default function BookPage() {
                                       {service.description}
                                     </p>
                                   )}
-                                  <p className="mt-2 font-semibold text-figaro-black">
+                                  <p className="mt-2.5 font-semibold text-figaro-black">
                                     ${Number(service.price)}
                                   </p>
                                 </div>

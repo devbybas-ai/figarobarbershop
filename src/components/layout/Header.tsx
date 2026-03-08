@@ -5,9 +5,7 @@ import Link from "next/link";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/services", label: "Services" },
   { href: "/barbers", label: "Our Barbers" },
-  { href: "/book", label: "Book Now" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -43,7 +41,17 @@ export function Header() {
           </nav>
 
           {/* CTA */}
-          <div className="hidden md:block">
+          <div className="hidden items-center gap-4 md:flex">
+            <span className="text-sm text-figaro-cream/50">View Services</span>
+            <svg
+              className="h-4 w-4 animate-bounce-x text-figaro-gold"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2.5}
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
             <Link
               href="/book"
               className="rounded-sm bg-figaro-gold px-5 py-2.5 text-sm font-semibold text-figaro-dark transition-colors hover:bg-figaro-gold-light"
