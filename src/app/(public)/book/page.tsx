@@ -248,7 +248,7 @@ export default function BookPage() {
   }
 
   return (
-    <section className="min-h-screen bg-figaro-cream">
+    <section className="min-h-screen bg-figaro-cream pb-24 lg:pb-0">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb Steps */}
         <nav className="flex items-center gap-2 text-sm" aria-label="Booking steps">
@@ -284,68 +284,82 @@ export default function BookPage() {
           ))}
         </nav>
 
-        {/* Mobile Cart Summary Bar */}
-        <div className="mt-4 lg:hidden">
-          <button
-            type="button"
-            onClick={() => setMobileCartOpen(!mobileCartOpen)}
-            className="flex w-full items-center justify-between rounded-lg border border-figaro-black/10 bg-white px-4 py-3"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-figaro-dark text-sm font-bold text-figaro-cream">
-                {selectedServices.length}
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-figaro-black">
-                  {selectedServices.length === 0
-                    ? "No services selected"
-                    : `${selectedServices.length} service${selectedServices.length > 1 ? "s" : ""}`}
-                </p>
-                {totalPrice > 0 && (
-                  <p className="text-xs text-figaro-black/50">
-                    ${totalPrice} &middot; {formatDuration(totalDuration)}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {canContinue() && (
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (step === 3) handleSubmit();
-                    else setStep(step + 1);
-                  }}
-                  className="rounded-full bg-figaro-dark px-4 py-1.5 text-sm font-semibold text-white"
-                >
-                  {step === 3 ? "Book" : "Continue"}
-                </span>
-              )}
-              <svg
-                className={`h-5 w-5 text-figaro-black/40 transition-transform ${mobileCartOpen ? "rotate-180" : ""}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-              </svg>
-            </div>
-          </button>
-
-          {/* Expandable mobile cart details */}
+        {/* Mobile Floating Cart Bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
+          {/* Expandable cart details (slides up above the bar) */}
           {mobileCartOpen && selectedServiceObjects.length > 0 && (
-            <div className="mt-1 rounded-lg border border-figaro-black/10 bg-white px-4 py-3">
-              <div className="space-y-2">
+            <div className="mx-4 mb-2 rounded-xl border border-figaro-black/10 bg-white px-5 py-4 shadow-lg">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-sm font-semibold text-figaro-black">Your Services</p>
+                <p className="text-sm font-semibold text-figaro-black">${totalPrice}</p>
+              </div>
+              <div className="space-y-3">
                 {selectedServiceObjects.map((s) => (
-                  <div key={s.id} className="flex items-center justify-between text-sm">
-                    <span className="text-figaro-black">{s.name}</span>
-                    <span className="text-figaro-black/60">${Number(s.price)}</span>
+                  <div key={s.id} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-figaro-black">{s.name}</p>
+                      <p className="text-xs text-figaro-black/40">{formatDuration(s.durationMinutes)}</p>
+                    </div>
+                    <p className="text-sm text-figaro-black/60">${Number(s.price)}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
+
+          {/* Sticky bottom bar */}
+          <div className="border-t border-figaro-black/10 bg-white px-5 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => setMobileCartOpen(!mobileCartOpen)}
+                className="flex min-w-0 flex-1 items-center gap-3"
+              >
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-figaro-dark text-sm font-bold text-figaro-cream">
+                  {selectedServices.length}
+                </div>
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-semibold text-figaro-black">
+                    {selectedServices.length === 0
+                      ? "No services selected"
+                      : `${selectedServices.length} service${selectedServices.length > 1 ? "s" : ""}`}
+                  </p>
+                  {totalPrice > 0 && (
+                    <p className="text-xs text-figaro-black/50">
+                      ${totalPrice} &middot; {formatDuration(totalDuration)}
+                    </p>
+                  )}
+                </div>
+                {selectedServices.length > 0 && (
+                  <svg
+                    className={`h-5 w-5 flex-shrink-0 text-figaro-black/30 transition-transform ${mobileCartOpen ? "rotate-180" : ""}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                  </svg>
+                )}
+              </button>
+              {canContinue() && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (step === 3) handleSubmit();
+                    else setStep(step + 1);
+                  }}
+                  className="flex-shrink-0 rounded-full bg-figaro-dark px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-figaro-black"
+                >
+                  {submitting
+                    ? "Booking..."
+                    : step === 3
+                      ? `Book — $${totalPrice}`
+                      : "Continue"}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="mt-4 flex flex-col gap-8 lg:mt-8 lg:flex-row">
@@ -361,7 +375,7 @@ export default function BookPage() {
                 <h1 className="text-3xl font-bold text-figaro-black">Services</h1>
 
                 {/* Category Filter Tabs (scroll to section) */}
-                <div className="sticky top-16 z-10 -mx-4 bg-figaro-cream px-4 pb-4 pt-2 sm:-mx-0 sm:px-0">
+                <div className="sticky top-14 z-10 -mx-4 bg-figaro-cream px-4 pb-3 pt-5 sm:top-16 sm:-mx-0 sm:px-0 sm:pt-4">
                   <div className="flex gap-2">
                     {categories.map((cat) => (
                       <button
