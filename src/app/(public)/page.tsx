@@ -180,7 +180,12 @@ export default function HomePage() {
               <h2 className="text-3xl font-bold tracking-tight text-figaro-black sm:text-4xl">
                 What Our Clients Say
               </h2>
-              <div className="hidden items-center gap-2 sm:flex">
+              <a
+                href="https://www.fresha.com/a/figaro-barbershop-leucadia-encinitas-ee-uu-114-leucadia-boulevard-t5d200mp?reviews=true"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden items-center gap-2 transition-opacity hover:opacity-80 sm:flex"
+              >
                 <div className="flex text-figaro-gold">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
@@ -195,8 +200,10 @@ export default function HomePage() {
                   ))}
                 </div>
                 <span className="text-lg font-bold text-figaro-black">4.9</span>
-                <span className="text-sm text-figaro-black/50">(36 reviews)</span>
-              </div>
+                <span className="text-sm text-figaro-black/50 underline decoration-figaro-black/20 underline-offset-2">
+                  (36 reviews)
+                </span>
+              </a>
             </div>
           </motion.div>
 

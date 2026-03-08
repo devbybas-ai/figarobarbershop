@@ -195,7 +195,7 @@ async function main() {
       name: "Full Shave",
       description:
         "Achieve a smooth, clean look with a full shave customized just for you. Expert attention to detail as facial hair is gently removed, leaving your skin refreshed and revitalized.",
-      category: "SHAVE" as const,
+      category: "HAIRCUT" as const,
       durationMinutes: 50,
       price: 50,
     },

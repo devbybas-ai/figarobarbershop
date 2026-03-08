@@ -24,7 +24,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <span className="text-2xl font-bold tracking-tight text-figaro-cream">FIGARO</span>
-            <span className="hidden text-sm font-light tracking-widest text-figaro-gold sm:block">
+            <span className="hidden text-2xl font-light tracking-widest text-figaro-gold sm:block">
               BARBERSHOP
             </span>
           </Link>

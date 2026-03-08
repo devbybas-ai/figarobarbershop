@@ -19,14 +19,30 @@ interface Service {
   price: string;
 }
 
+type TimeSlot = { time: string; label: string };
+
+const STEPS = ["Services", "Professional", "Time", "Confirm"] as const;
+
+function formatDuration(minutes: number): string {
+  if (minutes >= 60) {
+    const hrs = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hrs} hr ${mins} min` : `${hrs} hr`;
+  }
+  return `${minutes} min`;
+}
+
 export default function BookPage() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  const [selectedBarber, setSelectedBarber] = useState("");
+  const [selectedBarber, setSelectedBarber] = useState<string>("");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -37,13 +53,45 @@ export default function BookPage() {
   useEffect(() => {
     fetch("/api/barbers")
       .then((r) => r.json())
-      .then(setBarbers)
+      .then((data: Barber[]) => setBarbers(data))
       .catch(() => setBarbers([]));
     fetch("/api/services")
       .then((r) => r.json())
-      .then(setServices)
+      .then((data: Service[]) => {
+        setServices(data);
+        const cats = [...new Set(data.map((s) => s.category))];
+        if (cats.length > 0 && cats[0]) setActiveCategory(cats[0]);
+      })
       .catch(() => setServices([]));
   }, []);
+
+  // Fetch available time slots when date or barber changes
+  useEffect(() => {
+    if (!date || !selectedBarber) {
+      setAvailableSlots([]);
+      return;
+    }
+    setLoadingSlots(true);
+    setTime("");
+    fetch(
+      `/api/appointments/availability?date=${date}&barberId=${selectedBarber}&duration=${totalDuration}`,
+    )
+      .then((r) => r.json())
+      .then((data: { availableSlots: string[] }) => {
+        const slots: TimeSlot[] = (data.availableSlots ?? []).map((s: string) => {
+          const [h, m] = s.split(":");
+          const hour = parseInt(h ?? "0", 10);
+          const minute = m ?? "00";
+          const ampm = hour >= 12 ? "PM" : "AM";
+          const h12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+          return { time: s, label: `${h12}:${minute} ${ampm}` };
+        });
+        setAvailableSlots(slots);
+      })
+      .catch(() => setAvailableSlots([]))
+      .finally(() => setLoadingSlots(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, selectedBarber]);
 
   function toggleService(id: string) {
     setSelectedServices((prev) =>
@@ -51,13 +99,27 @@ export default function BookPage() {
     );
   }
 
-  const totalPrice = services
-    .filter((s) => selectedServices.includes(s.id))
-    .reduce((sum, s) => sum + Number(s.price), 0);
+  const selectedServiceObjects = services.filter((s) => selectedServices.includes(s.id));
+  const totalPrice = selectedServiceObjects.reduce((sum, s) => sum + Number(s.price), 0);
+  const totalDuration = selectedServiceObjects.reduce((sum, s) => sum + s.durationMinutes, 0);
+  const categories = [...new Set(services.map((s) => s.category))];
+  const selectedBarberObj = barbers.find((b) => b.id === selectedBarber);
 
-  const totalDuration = services
-    .filter((s) => selectedServices.includes(s.id))
-    .reduce((sum, s) => sum + s.durationMinutes, 0);
+  const CATEGORY_LABELS: Record<string, string> = {
+    HAIRCUT: "Haircut",
+    BEARD: "Beard",
+    SHAVE: "Shaves",
+    COMBO: "Combos",
+    OTHER: "Other",
+  };
+
+  function canContinue(): boolean {
+    if (step === 0) return selectedServices.length > 0;
+    if (step === 1) return !!selectedBarber;
+    if (step === 2) return !!date && !!time;
+    if (step === 3) return !!firstName && !!lastName;
+    return false;
+  }
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -85,6 +147,18 @@ export default function BookPage() {
     }
   }
 
+  // Generate next 14 days for date picker
+  const dateOptions = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    return {
+      value: d.toISOString().split("T")[0] ?? "",
+      dayName: d.toLocaleDateString("en-US", { weekday: "short" }),
+      dayNum: d.getDate(),
+      month: d.toLocaleDateString("en-US", { month: "short" }),
+    };
+  });
+
   if (submitted) {
     return (
       <section className="flex min-h-[70vh] items-center justify-center bg-figaro-cream">
@@ -107,192 +181,310 @@ export default function BookPage() {
           </div>
           <h2 className="mt-4 text-2xl font-bold text-figaro-black">You&apos;re Booked!</h2>
           <p className="mt-2 text-figaro-black/60">We look forward to seeing you at Figaro.</p>
+          <div className="mt-6 rounded-sm border border-figaro-black/10 bg-white p-6 text-left">
+            <p className="text-sm text-figaro-black/50">Your appointment</p>
+            <p className="mt-1 font-semibold text-figaro-black">
+              {selectedBarberObj?.firstName} &middot;{" "}
+              {new Date(`${date}T${time}:00`).toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              at{" "}
+              {(() => {
+                const [h, m] = time.split(":");
+                const hour = parseInt(h ?? "0", 10);
+                const ampm = hour >= 12 ? "PM" : "AM";
+                const h12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+                return `${h12}:${m} ${ampm}`;
+              })()}
+            </p>
+            <div className="mt-3 space-y-1">
+              {selectedServiceObjects.map((s) => (
+                <p key={s.id} className="text-sm text-figaro-black/70">
+                  {s.name} — ${Number(s.price)}
+                </p>
+              ))}
+            </div>
+            <div className="mt-3 border-t border-figaro-black/10 pt-3">
+              <p className="font-semibold text-figaro-black">Total: ${totalPrice}</p>
+            </div>
+          </div>
         </motion.div>
       </section>
     );
   }
 
   return (
-    <>
-      {/* Hero Banner */}
-      <section className="relative flex h-48 items-center justify-center overflow-hidden bg-figaro-dark sm:h-56">
-        <img
-          src="/images/shop-chairs.jpg"
-          alt="Figaro Barbershop chair"
-          className="absolute inset-0 h-full w-full object-cover opacity-25"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-figaro-dark/40 to-figaro-dark/80" />
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-figaro-teal via-figaro-gold to-figaro-teal" />
-        <div className="relative z-10 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-figaro-cream sm:text-5xl">
-            Book Your Appointment
-          </h1>
-          <div className="flex items-center justify-center gap-3">
-            <div className="h-px w-8 bg-figaro-teal" />
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-figaro-teal">
-              Appointments
-            </p>
-            <div className="h-px w-8 bg-figaro-teal" />
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-figaro-cream py-16">
-        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-          {/* Progress Steps */}
-          <div className="mt-8 flex justify-center gap-2">
-            {[1, 2, 3].map((s) => (
-              <div
-                key={s}
-                className={`h-2 w-16 rounded-full transition-colors ${
-                  s <= step
-                    ? s === step
-                      ? "bg-figaro-teal"
-                      : "bg-figaro-gold"
-                    : "bg-figaro-black/10"
+    <section className="min-h-screen bg-figaro-cream">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Breadcrumb Steps */}
+        <nav className="flex items-center gap-2 text-sm" aria-label="Booking steps">
+          {STEPS.map((label, i) => (
+            <span key={label} className="flex items-center gap-2">
+              {i > 0 && (
+                <svg
+                  className="h-4 w-4 text-figaro-black/30"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              )}
+              <button
+                type="button"
+                onClick={() => i < step && setStep(i)}
+                disabled={i > step}
+                className={`transition-colors ${
+                  i === step
+                    ? "font-semibold text-figaro-black"
+                    : i < step
+                      ? "cursor-pointer text-figaro-black/50 underline decoration-figaro-black/20 underline-offset-2 hover:text-figaro-black"
+                      : "cursor-default text-figaro-black/30"
                 }`}
-              />
-            ))}
-          </div>
+              >
+                {label}
+              </button>
+            </span>
+          ))}
+        </nav>
 
-          <div className="mt-10">
-            {/* Step 1: Select Barber & Services */}
+        <div className="mt-8 flex flex-col gap-8 lg:flex-row">
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Step 0: Services */}
+            {step === 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h1 className="text-3xl font-bold text-figaro-black">Services</h1>
+
+                {/* Category Filter Tabs */}
+                <div className="mt-6 flex gap-2">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setActiveCategory(cat)}
+                      className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+                        activeCategory === cat
+                          ? "bg-figaro-black text-white"
+                          : "bg-figaro-black/5 text-figaro-black hover:bg-figaro-black/10"
+                      }`}
+                    >
+                      {CATEGORY_LABELS[cat] ?? cat}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Service Cards by Category */}
+                {categories
+                  .filter((cat) => cat === activeCategory)
+                  .map((cat) => (
+                    <div key={cat} className="mt-8">
+                      <h2 className="text-xl font-bold text-figaro-black">
+                        {CATEGORY_LABELS[cat] ?? cat}
+                      </h2>
+                      <div className="mt-4 space-y-4">
+                        {services
+                          .filter((s) => s.category === cat)
+                          .map((service) => {
+                            const isSelected = selectedServices.includes(service.id);
+                            return (
+                              <div
+                                key={service.id}
+                                className={`flex items-start justify-between rounded-lg border bg-white p-5 transition-all ${
+                                  isSelected
+                                    ? "border-figaro-gold shadow-sm"
+                                    : "border-figaro-black/10 hover:border-figaro-black/20"
+                                }`}
+                              >
+                                <div className="flex-1 pr-4">
+                                  <h3 className="font-semibold text-figaro-black">{service.name}</h3>
+                                  <p className="mt-0.5 text-sm text-figaro-black/50">
+                                    {formatDuration(service.durationMinutes)}
+                                  </p>
+                                  {service.description && (
+                                    <p className="mt-1.5 line-clamp-2 text-sm text-figaro-black/60">
+                                      {service.description}
+                                    </p>
+                                  )}
+                                  <p className="mt-2 font-semibold text-figaro-black">
+                                    ${Number(service.price)}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleService(service.id)}
+                                  className={`mt-2 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                                    isSelected
+                                      ? "border-figaro-gold bg-figaro-gold text-white"
+                                      : "border-figaro-black/20 text-figaro-black/40 hover:border-figaro-black/40"
+                                  }`}
+                                  aria-label={isSelected ? `Remove ${service.name}` : `Add ${service.name}`}
+                                >
+                                  {isSelected ? (
+                                    <svg
+                                      className="h-5 w-5"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      strokeWidth={2.5}
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="m4.5 12.75 6 6 9-13.5"
+                                      />
+                                    </svg>
+                                  ) : (
+                                    <svg
+                                      className="h-5 w-5"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      strokeWidth={2}
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M12 4.5v15m7.5-7.5h-15"
+                                      />
+                                    </svg>
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  ))}
+              </motion.div>
+            )}
+
+            {/* Step 1: Professional */}
             {step === 1 && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                <h2 className="text-lg font-semibold text-figaro-black">Choose Your Barber</h2>
-                <div className="mt-4 grid grid-cols-2 gap-3">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h1 className="text-3xl font-bold text-figaro-black">Professional</h1>
+                <p className="mt-2 text-figaro-black/50">Choose your barber</p>
+                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {barbers.map((barber) => (
                     <button
                       key={barber.id}
                       type="button"
                       onClick={() => setSelectedBarber(barber.id)}
-                      className={`rounded-sm border p-4 text-left transition-colors ${
+                      className={`flex items-center gap-4 rounded-lg border bg-white p-5 text-left transition-all ${
                         selectedBarber === barber.id
-                          ? "border-figaro-teal bg-figaro-teal/10 shadow-md shadow-figaro-teal/5"
-                          : "border-figaro-black/10 bg-white hover:border-figaro-gold/50"
+                          ? "border-figaro-gold shadow-sm"
+                          : "border-figaro-black/10 hover:border-figaro-black/20"
                       }`}
                     >
-                      <p className="font-semibold text-figaro-black">
-                        {barber.firstName} {barber.lastName}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-
-                <h2 className="mt-8 text-lg font-semibold text-figaro-black">Select Services</h2>
-                <div className="mt-4 space-y-2">
-                  {services.map((service) => (
-                    <button
-                      key={service.id}
-                      type="button"
-                      onClick={() => toggleService(service.id)}
-                      className={`flex w-full items-center justify-between rounded-sm border p-4 text-left transition-colors ${
-                        selectedServices.includes(service.id)
-                          ? "border-figaro-gold bg-figaro-gold/10"
-                          : "border-figaro-black/10 bg-white hover:border-figaro-gold/50"
-                      }`}
-                    >
-                      <div>
-                        <p className="font-semibold text-figaro-black">{service.name}</p>
-                        <p className="text-sm text-figaro-black/50">
-                          {service.durationMinutes} min
-                        </p>
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-figaro-dark text-lg font-bold text-figaro-cream">
+                        {barber.firstName[0]}
                       </div>
-                      <p className="text-lg font-bold text-figaro-gold">${Number(service.price)}</p>
+                      <div>
+                        <p className="font-semibold text-figaro-black">{barber.firstName}</p>
+                        {barber.bio && (
+                          <p className="mt-0.5 line-clamp-1 text-sm text-figaro-black/50">
+                            {barber.bio}
+                          </p>
+                        )}
+                      </div>
                     </button>
                   ))}
                 </div>
+              </motion.div>
+            )}
 
-                {selectedServices.length > 0 && (
-                  <div className="mt-4 rounded-sm bg-figaro-dark p-4 text-figaro-cream">
-                    <div className="flex justify-between">
-                      <span>Total: {totalDuration} min</span>
-                      <span className="font-bold text-figaro-gold">${totalPrice}</span>
-                    </div>
+            {/* Step 2: Time */}
+            {step === 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h1 className="text-3xl font-bold text-figaro-black">Time</h1>
+                <p className="mt-2 text-figaro-black/50">
+                  Pick a date and time with {selectedBarberObj?.firstName}
+                </p>
+
+                {/* Date Picker */}
+                <div className="mt-6">
+                  <h2 className="text-sm font-medium text-figaro-black/70">Date</h2>
+                  <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+                    {dateOptions.map((d) => (
+                      <button
+                        key={d.value}
+                        type="button"
+                        onClick={() => setDate(d.value)}
+                        className={`flex flex-shrink-0 flex-col items-center rounded-lg border px-4 py-3 transition-all ${
+                          date === d.value
+                            ? "border-figaro-gold bg-figaro-gold text-figaro-dark"
+                            : "border-figaro-black/10 bg-white text-figaro-black hover:border-figaro-black/20"
+                        }`}
+                      >
+                        <span className="text-xs font-medium uppercase">{d.dayName}</span>
+                        <span className="mt-0.5 text-lg font-bold">{d.dayNum}</span>
+                        <span className="text-xs">{d.month}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Time Slots */}
+                {date && (
+                  <div className="mt-8">
+                    <h2 className="text-sm font-medium text-figaro-black/70">Available times</h2>
+                    {loadingSlots ? (
+                      <p className="mt-4 text-sm text-figaro-black/40">Loading available times...</p>
+                    ) : availableSlots.length === 0 ? (
+                      <p className="mt-4 text-sm text-figaro-black/40">
+                        No available slots for this date. Try another day.
+                      </p>
+                    ) : (
+                      <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                        {availableSlots.map((slot) => (
+                          <button
+                            key={slot.time}
+                            type="button"
+                            onClick={() => setTime(slot.time)}
+                            className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+                              time === slot.time
+                                ? "border-figaro-gold bg-figaro-gold text-figaro-dark"
+                                : "border-figaro-black/10 bg-white text-figaro-black hover:border-figaro-black/20"
+                            }`}
+                          >
+                            {slot.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
-
-                <button
-                  type="button"
-                  disabled={!selectedBarber || selectedServices.length === 0}
-                  onClick={() => setStep(2)}
-                  className="mt-6 w-full rounded-sm bg-figaro-gold px-4 py-3 font-semibold text-figaro-dark transition-colors hover:bg-figaro-gold-light disabled:opacity-50"
-                >
-                  Next: Pick Date &amp; Time
-                </button>
               </motion.div>
             )}
 
-            {/* Step 2: Date & Time */}
-            {step === 2 && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                <h2 className="text-lg font-semibold text-figaro-black">Pick Date &amp; Time</h2>
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-figaro-black">
-                      Date
-                    </label>
-                    <input
-                      id="date"
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      min={new Date().toISOString().split("T")[0]}
-                      className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-teal focus:outline-none focus:ring-1 focus:ring-figaro-teal"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="time" className="block text-sm font-medium text-figaro-black">
-                      Time
-                    </label>
-                    <select
-                      id="time"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                      className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-teal focus:outline-none focus:ring-1 focus:ring-figaro-teal"
-                    >
-                      <option value="">Select time</option>
-                      {Array.from({ length: 20 }, (_, i) => {
-                        const hour = Math.floor(i / 2) + 9;
-                        const min = i % 2 === 0 ? "00" : "30";
-                        if (hour >= 19) return null;
-                        const label = `${hour > 12 ? hour - 12 : hour}:${min} ${hour >= 12 ? "PM" : "AM"}`;
-                        const val = `${hour.toString().padStart(2, "0")}:${min}`;
-                        return (
-                          <option key={val} value={val}>
-                            {label}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                </div>
-                <div className="mt-6 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="flex-1 rounded-sm border border-figaro-black/20 px-4 py-3 font-semibold text-figaro-black transition-colors hover:bg-figaro-black/5"
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!date || !time}
-                    onClick={() => setStep(3)}
-                    className="flex-1 rounded-sm bg-figaro-gold px-4 py-3 font-semibold text-figaro-dark transition-colors hover:bg-figaro-gold-light disabled:opacity-50"
-                  >
-                    Next: Your Info
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Step 3: Contact Info */}
+            {/* Step 3: Confirm */}
             {step === 3 && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                <h2 className="text-lg font-semibold text-figaro-black">Your Information</h2>
-                <div className="mt-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h1 className="text-3xl font-bold text-figaro-black">Confirm Booking</h1>
+                <p className="mt-2 text-figaro-black/50">Enter your details to complete your booking</p>
+
+                <div className="mt-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label
                         htmlFor="firstName"
@@ -306,7 +498,7 @@ export default function BookPage() {
                         required
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-teal focus:outline-none focus:ring-1 focus:ring-figaro-teal"
+                        className="mt-1 block w-full rounded-lg border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
                       />
                     </div>
                     <div>
@@ -322,7 +514,7 @@ export default function BookPage() {
                         required
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-teal focus:outline-none focus:ring-1 focus:ring-figaro-teal"
+                        className="mt-1 block w-full rounded-lg border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
                       />
                     </div>
                   </div>
@@ -335,7 +527,7 @@ export default function BookPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-teal focus:outline-none focus:ring-1 focus:ring-figaro-teal"
+                      className="mt-1 block w-full rounded-lg border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
                     />
                   </div>
                   <div>
@@ -347,32 +539,138 @@ export default function BookPage() {
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-teal focus:outline-none focus:ring-1 focus:ring-figaro-teal"
+                      className="mt-1 block w-full rounded-lg border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
                     />
                   </div>
-                </div>
-                <div className="mt-6 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setStep(2)}
-                    className="flex-1 rounded-sm border border-figaro-black/20 px-4 py-3 font-semibold text-figaro-black transition-colors hover:bg-figaro-black/5"
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!firstName || !lastName || submitting}
-                    onClick={handleSubmit}
-                    className="flex-1 rounded-sm bg-figaro-gold px-4 py-3 font-semibold text-figaro-dark transition-colors hover:bg-figaro-gold-light disabled:opacity-50"
-                  >
-                    {submitting ? "Booking..." : `Book Now - $${totalPrice}`}
-                  </button>
                 </div>
               </motion.div>
             )}
           </div>
+
+          {/* Sidebar */}
+          <div className="w-full lg:w-80">
+            <div className="sticky top-24 rounded-lg border border-figaro-black/10 bg-white p-6">
+              {/* Shop Info */}
+              <div className="flex items-center gap-3">
+                <img
+                  src="/images/figaro-logo.avif"
+                  alt="Figaro Barbershop"
+                  className="h-14 w-14 rounded-lg object-cover"
+                />
+                <div>
+                  <h3 className="font-semibold text-figaro-black">Figaro Barbershop Leucadia</h3>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium text-figaro-black">4.9</span>
+                    <div className="flex text-figaro-gold">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg
+                          key={star}
+                          className="h-3.5 w-3.5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="text-xs text-figaro-black/40">(36)</span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-figaro-black/40">
+                    114 Leucadia Boulevard, Encinitas
+                  </p>
+                </div>
+              </div>
+
+              {/* Selected Items */}
+              <div className="mt-5 border-t border-figaro-black/10 pt-5">
+                {selectedServiceObjects.length === 0 ? (
+                  <p className="text-sm text-figaro-black/40">No services selected</p>
+                ) : (
+                  <div className="space-y-3">
+                    {selectedServiceObjects.map((s) => (
+                      <div key={s.id} className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-figaro-black">{s.name}</p>
+                          <p className="text-xs text-figaro-black/40">
+                            {formatDuration(s.durationMinutes)}
+                            {selectedBarberObj ? ` with ${selectedBarberObj.firstName}` : ""}
+                          </p>
+                        </div>
+                        <p className="text-sm font-medium text-figaro-black">
+                          ${Number(s.price)}
+                        </p>
+                      </div>
+                    ))}
+                    {date && time && (
+                      <div className="rounded-md bg-figaro-cream/50 px-3 py-2">
+                        <p className="text-xs font-medium text-figaro-black/60">
+                          {new Date(`${date}T${time}:00`).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })}{" "}
+                          at{" "}
+                          {(() => {
+                            const [h, m] = time.split(":");
+                            const hour = parseInt(h ?? "0", 10);
+                            const ampm = hour >= 12 ? "PM" : "AM";
+                            const h12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+                            return `${h12}:${m} ${ampm}`;
+                          })()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Total */}
+              <div className="mt-5 flex items-center justify-between border-t border-figaro-black/10 pt-5">
+                <span className="font-semibold text-figaro-black">Total</span>
+                <span className="font-semibold text-figaro-black">
+                  {totalPrice > 0 ? `$${totalPrice}` : "free"}
+                </span>
+              </div>
+
+              {/* Continue / Book Button */}
+              <button
+                type="button"
+                disabled={!canContinue() || submitting}
+                onClick={() => {
+                  if (step === 3) {
+                    handleSubmit();
+                  } else {
+                    setStep(step + 1);
+                  }
+                }}
+                className={`mt-5 w-full rounded-full py-3.5 text-center font-semibold transition-all ${
+                  canContinue()
+                    ? "bg-figaro-dark text-white hover:bg-figaro-black"
+                    : "cursor-not-allowed bg-figaro-black/20 text-figaro-black/40"
+                }`}
+              >
+                {submitting
+                  ? "Booking..."
+                  : step === 3
+                    ? `Book Now${totalPrice > 0 ? ` — $${totalPrice}` : ""}`
+                    : "Continue"}
+              </button>
+
+              {/* Back Button */}
+              {step > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setStep(step - 1)}
+                  className="mt-2 w-full py-2 text-center text-sm text-figaro-black/50 transition-colors hover:text-figaro-black"
+                >
+                  Back
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
