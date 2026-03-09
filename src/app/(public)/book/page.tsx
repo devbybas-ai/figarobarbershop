@@ -430,11 +430,11 @@ export default function BookPage() {
                               >
                                 <div className="flex-1 pr-4">
                                   <h3 className="font-semibold text-figaro-black">{service.name}</h3>
-                                  <p className="mt-0.5 text-sm text-figaro-black/50">
+                                  <p className="mt-0.5 text-sm text-figaro-black/70">
                                     {formatDuration(service.durationMinutes)}
                                   </p>
                                   {service.description && (
-                                    <p className="mt-1.5 line-clamp-2 text-sm text-figaro-black/60">
+                                    <p className="mt-1.5 line-clamp-2 text-sm text-figaro-black/70">
                                       {service.description}
                                     </p>
                                   )}
