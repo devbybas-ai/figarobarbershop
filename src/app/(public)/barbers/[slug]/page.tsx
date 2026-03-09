@@ -24,12 +24,12 @@ interface BarberProfile {
 }
 
 const BARBER_IMAGES: Record<string, string> = {
-  ricardo: "/images/gallery/Ricardo.jpeg",
-  zeke: "/images/gallery/Zeke.jpeg",
-  bryam: "/images/gallery/Bryam.jpeg",
-  johnny: "/images/gallery/Johnny.jpeg",
-  david: "/images/gallery/David.png",
-  austin: "/images/gallery/Austin.jpeg",
+  ricardo: "/images/gallery/Ricardo.webp",
+  zeke: "/images/gallery/Zeke.webp",
+  bryam: "/images/gallery/Bryam.webp",
+  johnny: "/images/gallery/Johnny.webp",
+  david: "/images/gallery/David.webp",
+  austin: "/images/gallery/Austin.webp",
 };
 
 const BARBER_ROLES: Record<string, string> = {

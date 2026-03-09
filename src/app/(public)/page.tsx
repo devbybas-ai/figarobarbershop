@@ -63,7 +63,7 @@ export default function HomePage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
-            src="/images/shop-chairs.jpg"
+            src="/images/shop-chairs.webp"
             alt="Figaro Barbershop Leucadia interior"
             className="h-full w-full object-cover opacity-100"
           />
@@ -262,7 +262,7 @@ export default function HomePage() {
         {/* Shop photo behind teal overlay */}
         <div className="absolute inset-0">
           <img
-            src="/images/shop-wall.jpg"
+            src="/images/shop-wall.webp"
             alt=""
             className="h-full w-full object-cover opacity-20"
             loading="lazy"

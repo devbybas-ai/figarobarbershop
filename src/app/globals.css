@@ -41,16 +41,6 @@ body {
   color: var(--foreground);
 }
 
-/* Custom scrollbar for gallery strips */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
 /* Auto-scrolling marquee for gallery strip */
 @keyframes marquee {
   0% {

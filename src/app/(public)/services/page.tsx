@@ -37,7 +37,7 @@ export default async function ServicesPage() {
       {/* Hero Banner */}
       <section className="relative flex h-64 items-center justify-center overflow-hidden bg-figaro-dark sm:h-80">
         <img
-          src="/images/shop-wall.jpg"
+          src="/images/shop-wall.webp"
           alt="Figaro Barbershop interior with vintage grooming products"
           className="absolute inset-0 h-full w-full object-cover opacity-25"
         />

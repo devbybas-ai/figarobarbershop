@@ -65,7 +65,7 @@ export function Header() {
             type="button"
             className="flex items-center justify-center rounded-sm p-2 text-figaro-cream md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-expanded={mobileOpen}
+            aria-expanded={mobileOpen ? "true" : "false"}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
             <svg

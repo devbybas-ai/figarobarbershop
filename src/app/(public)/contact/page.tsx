@@ -13,8 +13,9 @@ export default function ContactPage() {
       {/* Hero Banner */}
       <section className="relative flex h-48 items-center justify-center overflow-hidden bg-figaro-dark sm:h-64">
         <img
-          src="/images/shop-interior.jpg"
+          src="/images/shop-interior.webp"
           alt="Figaro Barbershop Leucadia storefront"
+          loading="lazy"
           className="absolute inset-0 h-full w-full object-cover opacity-25"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-figaro-dark/40 to-figaro-dark/80" />

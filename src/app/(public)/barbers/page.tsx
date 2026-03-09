@@ -8,12 +8,12 @@ export const metadata: Metadata = {
 };
 
 const BARBER_IMAGES: Record<string, string> = {
-  Ricardo: "/images/gallery/Ricardo.jpeg",
-  Zeke: "/images/gallery/Zeke.jpeg",
-  Bryam: "/images/gallery/Bryam.jpeg",
-  Johnny: "/images/gallery/Johnny.jpeg",
-  David: "/images/gallery/David.png",
-  Austin: "/images/gallery/Austin.jpeg",
+  Ricardo: "/images/gallery/Ricardo.webp",
+  Zeke: "/images/gallery/Zeke.webp",
+  Bryam: "/images/gallery/Bryam.webp",
+  Johnny: "/images/gallery/Johnny.webp",
+  David: "/images/gallery/David.webp",
+  Austin: "/images/gallery/Austin.webp",
 };
 
 const PORTFOLIO_IMAGES = [
@@ -38,7 +38,7 @@ export default async function BarbersPage() {
       {/* Hero Banner */}
       <section className="relative flex h-64 items-center justify-center overflow-hidden bg-figaro-dark sm:h-80">
         <img
-          src="/images/shop-chairs.jpg"
+          src="/images/shop-chairs.webp"
           alt="Figaro Barbershop interior"
           className="absolute inset-0 h-full w-full object-cover opacity-25"
         />
@@ -76,6 +76,7 @@ export default async function BarbersPage() {
                     <img
                       src={BARBER_IMAGES[barber.firstName]}
                       alt={`${barber.firstName} ${barber.lastName} - Barber at Figaro`}
+                      loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-figaro-dark/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
