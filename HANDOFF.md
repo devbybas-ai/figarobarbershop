@@ -1,7 +1,7 @@
 # Figaro Command Center - Session Handoff
 
 > Last updated: 2026-03-06
-> Session: 4 (complete)
+> Session: 6 (complete)
 
 ## Current State
 
@@ -131,11 +131,20 @@
 - **CSS**: Added `animate-bounce-x` keyframe animation for horizontal arrow bounce
 - **`bounce-x` animation**: `globals.css` — horizontal arrow animation (1.5s ease-in-out infinite)
 
+### Done (Session 6)
+
+- **Address linked to Google Maps**: Footer, contact page, and booking sidebar address now opens Google Maps in new tab with teal hover
+- **Mandatory form fields**: Email and phone now required on both booking form and intake form
+  - Booking: added `*` labels, `required` attributes, `canContinue()` validation updated
+  - Intake: phone added to required fields, Zod schema updated (`z.string().min(1)`)
+- **Booking sidebar logo fix**: Changed from `object-cover` (clipping) to `object-contain`, increased size h-14→h-16, increased sticky offset top-24→top-32
+- **Service card text contrast**: Duration and description opacity bumped from /50 and /60 to /70 for better readability
+
 ### Blockers
 
 - None
 
-### Next Steps (Session 6)
+### Next Steps (Session 7)
 
 1. Integrate Instagram Graph API for live feed on public site
 2. Integrate Stripe Connect for real payments
@@ -178,3 +187,4 @@
 | 4       | 2026-03-06 | Real shop photos integrated across site. Homepage streamlined (removed mosaic + gallery strip). Hero buttons swapped. "Command Center" -> "Barbershop Administration". Barber fake last names removed from DB + seed.                                   |
 | 4b      | 2026-03-08 | Continued homepage polish: removed services section, smoothed scroll animations, tested logo placement. Ready for VPS deployment.                                                                                                                       |
 | 5       | 2026-03-08 | VPS deployed. Booking UX overhaul (mobile cart, date picker, scroll-to-top). Availability API fixed. Header nav cleanup. Contact CTAs. Barber profile hero backgrounds. Mobile homepage improvements.                                                   |
+| 6       | 2026-03-08 | Google Maps address links. Mandatory email/phone on booking + intake. Booking sidebar logo fix. Service card text contrast improvement.                                                                                                                 |
