@@ -709,13 +709,13 @@ export default function BookPage() {
 
           {/* Sidebar (desktop only — mobile uses compact cart bar above) */}
           <div className="hidden w-full lg:block lg:w-80">
-            <div className="sticky top-24 rounded-lg border border-figaro-black/10 bg-white p-6">
+            <div className="sticky top-32 rounded-lg border border-figaro-black/10 bg-white p-6">
               {/* Shop Info */}
               <div className="flex items-center gap-3">
                 <img
                   src="/images/figaro-logo.avif"
                   alt="Figaro Barbershop"
-                  className="h-14 w-14 rounded-lg object-cover"
+                  className="h-16 w-16 flex-shrink-0 object-contain"
                 />
                 <div>
                   <h3 className="font-semibold text-figaro-black">Figaro Barbershop Leucadia</h3>
