@@ -32,7 +32,7 @@ export default function IntakePage() {
       firstName: form.get("firstName") as string,
       lastName: form.get("lastName") as string,
       email: form.get("email") as string,
-      phone: (form.get("phone") as string) || undefined,
+      phone: form.get("phone") as string,
       preferredBarber: (form.get("preferredBarber") as string) || undefined,
       hairType: (form.get("hairType") as string) || undefined,
       allergies: (form.get("allergies") as string) || undefined,
@@ -152,12 +152,13 @@ export default function IntakePage() {
 
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-figaro-black">
-              Phone
+              Phone *
             </label>
             <input
               id="phone"
               name="phone"
               type="tel"
+              required
               className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
             />
           </div>

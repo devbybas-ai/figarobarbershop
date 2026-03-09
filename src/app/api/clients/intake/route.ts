@@ -7,7 +7,7 @@ const intakeSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   email: z.email(),
-  phone: z.string().optional(),
+  phone: z.string().min(1),
   preferredBarber: z.string().optional(),
   hairType: z.string().optional(),
   allergies: z.string().optional(),

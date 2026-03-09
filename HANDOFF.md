@@ -107,20 +107,43 @@
 - **Logo exploration**: Tested Figaro logo (avif) in hero and navbar with white filter — decided against it, reverted to text-only branding
 - Figaro logo file available at `public/images/figaro-logo.avif` for future use
 
+### Done (Session 5)
+
+- **VPS deployed**: Site live on Hostinger VPS, pulled from git
+- **Booking flow UX overhaul**:
+  - Mobile sticky cart bar at top (replaced broken fixed-bottom approach)
+  - Fresha-style service selection with category pills, auto-switching tabs via IntersectionObserver
+  - Scroll-to-top on all step navigation (continue, back, breadcrumb clicks)
+  - Date picker redesigned: 7-day grid with week pagination arrows (no scrollbars)
+- **Availability API fixed** (3 bugs):
+  - Response key mismatch (`slots` → `availableSlots`) to match frontend
+  - Timezone-safe date parsing (local `new Date(year, month, day)` instead of UTC `new Date("YYYY-MM-DD")`)
+  - Returns `"HH:MM"` strings (only available slots) instead of ISO timestamp objects
+- **Header nav cleaned up**: Removed redundant "Book Now" and "Services" links; added "View Services" text with animated arrow next to "Book Appointment" CTA
+- **Contact page CTAs**: Added "Book Now" (gold) and "Meet Our Crew" (teal outline) buttons to Visit Us card
+- **Homepage mobile improvements**:
+  - Hero content moved up ~40% on mobile (`items-start pt-24` instead of `items-center`)
+  - "Book Your Cut" button solid teal on mobile for visibility (outline on desktop)
+- **Barber profile pages**:
+  - Hero backgrounds swapped to highlight cut/work photos from each barber's portfolio
+  - Background opacity increased (15% → 30%) for more visible work showcase
+  - Gradient overlays reduced ~50% for lighter, more photo-forward feel
+- **CSS**: Added `animate-bounce-x` keyframe animation for horizontal arrow bounce
+- **`bounce-x` animation**: `globals.css` — horizontal arrow animation (1.5s ease-in-out infinite)
+
 ### Blockers
 
 - None
 
-### Next Steps (Session 5)
+### Next Steps (Session 6)
 
-1. **Deploy to Hostinger VPS** -- client wants to start reviewing design live
-2. Tune homepage hero right-side brightness (currently at opacity-100 for testing)
-3. Integrate Instagram Graph API for live feed on public site
-4. Integrate Stripe Connect for real payments
-5. Build analytics dashboard with real Recharts data (currently sample data)
-6. Convert barber photos to avif for performance optimization
-7. Add E2E tests for login flow, booking flow, intake form
-8. Add more unit tests for API routes and auth helpers
+1. Integrate Instagram Graph API for live feed on public site
+2. Integrate Stripe Connect for real payments
+3. Build analytics dashboard with real Recharts data (currently sample data)
+4. Convert barber photos to avif for performance optimization
+5. Add E2E tests for login flow, booking flow, intake form
+6. Add more unit tests for API routes and auth helpers
+7. Individual barber profile pages: consider adding "Book with [name]" flow that pre-selects the barber
 
 ## Decisions Made
 
@@ -154,3 +177,4 @@
 | 3       | 2026-03-06 | Database connected and seeded. Auth.js v5 with bcrypt + role-based access. Dashboard wired to live data. Booking availability engine built. Intake form updated with real barbers. All quality gates passing.                                           |
 | 4       | 2026-03-06 | Real shop photos integrated across site. Homepage streamlined (removed mosaic + gallery strip). Hero buttons swapped. "Command Center" -> "Barbershop Administration". Barber fake last names removed from DB + seed.                                   |
 | 4b      | 2026-03-08 | Continued homepage polish: removed services section, smoothed scroll animations, tested logo placement. Ready for VPS deployment.                                                                                                                       |
+| 5       | 2026-03-08 | VPS deployed. Booking UX overhaul (mobile cart, date picker, scroll-to-top). Availability API fixed. Header nav cleanup. Contact CTAs. Barber profile hero backgrounds. Mobile homepage improvements.                                                   |

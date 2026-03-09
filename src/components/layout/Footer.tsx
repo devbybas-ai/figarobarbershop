@@ -75,8 +75,10 @@ export function Footer() {
               Visit Us
             </h3>
             <address className="mt-4 space-y-2 not-italic text-sm text-figaro-cream/60">
-              <p>114 Leucadia Blvd</p>
-              <p>Encinitas, CA 92024</p>
+              <a href="https://maps.google.com/?q=114+Leucadia+Blvd,+Encinitas,+CA+92024" target="_blank" rel="noopener noreferrer" className="block transition-colors hover:text-figaro-teal">
+                <p>114 Leucadia Blvd</p>
+                <p>Encinitas, CA 92024</p>
+              </a>
               <p className="pt-1">
                 <a href="tel:+17607512008" className="transition-colors hover:text-figaro-teal">
                   (760) 751-2008

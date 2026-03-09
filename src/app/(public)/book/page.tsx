@@ -150,7 +150,7 @@ export default function BookPage() {
     if (step === 0) return selectedServices.length > 0;
     if (step === 1) return !!selectedBarber;
     if (step === 2) return !!date && !!time;
-    if (step === 3) return !!firstName && !!lastName;
+    if (step === 3) return !!firstName && !!lastName && !!email && !!phone;
     return false;
   }
 
@@ -164,8 +164,8 @@ export default function BookPage() {
         body: JSON.stringify({
           clientFirstName: firstName,
           clientLastName: lastName,
-          clientEmail: email || undefined,
-          clientPhone: phone || undefined,
+          clientEmail: email,
+          clientPhone: phone,
           barberId: selectedBarber,
           serviceIds: selectedServices,
           scheduledAt,
@@ -678,11 +678,12 @@ export default function BookPage() {
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-figaro-black">
-                      Email
+                      Email *
                     </label>
                     <input
                       id="email"
                       type="email"
+                      required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="mt-1 block w-full rounded-lg border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
@@ -690,11 +691,12 @@ export default function BookPage() {
                   </div>
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-figaro-black">
-                      Phone
+                      Phone *
                     </label>
                     <input
                       id="phone"
                       type="tel"
+                      required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       className="mt-1 block w-full rounded-lg border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
@@ -734,9 +736,9 @@ export default function BookPage() {
                     </div>
                     <span className="text-xs text-figaro-black/40">(36)</span>
                   </div>
-                  <p className="mt-0.5 text-xs text-figaro-black/40">
+                  <a href="https://maps.google.com/?q=114+Leucadia+Blvd,+Encinitas,+CA+92024" target="_blank" rel="noopener noreferrer" className="mt-0.5 block text-xs text-figaro-black/40 transition-colors hover:text-figaro-teal">
                     114 Leucadia Boulevard, Encinitas
-                  </p>
+                  </a>
                 </div>
               </div>
 
