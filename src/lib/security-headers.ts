@@ -23,7 +23,7 @@ export const securityHeaders = [
   },
   {
     key: "Strict-Transport-Security",
-    value: "max-age=31536000; includeSubDomains",
+    value: "max-age=31536000; includeSubDomains; preload",
   },
   {
     key: "Content-Security-Policy",
@@ -33,7 +33,7 @@ export const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.cdninstagram.com https://*.stripe.com",
       "font-src 'self'",
-      "connect-src 'self' https://api.stripe.com https://graph.instagram.com https://api.resend.com",
+      "connect-src 'self' https://api.stripe.com https://graph.instagram.com",
       "frame-src https://js.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",

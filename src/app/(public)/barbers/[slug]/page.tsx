@@ -198,7 +198,7 @@ export default function BarberProfilePage({ params }: { params: Promise<{ slug: 
             <img
               src={heroBg}
               alt=""
-              className="h-full w-full object-cover opacity-30"
+              className="h-full w-full object-cover object-[center_25%] opacity-30"
               aria-hidden="true"
             />
           </div>

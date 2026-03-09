@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 
 interface Barber {
@@ -50,6 +50,15 @@ export default function BookPage() {
   const [phone, setPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
+
+  const selectedServiceObjects = services.filter((s) => selectedServices.includes(s.id));
+  const totalPrice = selectedServiceObjects.reduce((sum, s) => sum + Number(s.price), 0);
+  const totalDuration = selectedServiceObjects.reduce((sum, s) => sum + s.durationMinutes, 0);
+  const categories = useMemo(() => [...new Set(services.map((s) => s.category))], [services]);
+  const selectedBarberObj = barbers.find((b) => b.id === selectedBarber);
 
   useEffect(() => {
     fetch("/api/barbers")
@@ -66,7 +75,7 @@ export default function BookPage() {
       .catch(() => setServices([]));
   }, []);
 
-  // Fetch available time slots when date or barber changes
+  // Fetch available time slots when date, barber, or service duration changes
   useEffect(() => {
     if (!date || !selectedBarber) {
       setAvailableSlots([]);
@@ -91,15 +100,7 @@ export default function BookPage() {
       })
       .catch(() => setAvailableSlots([]))
       .finally(() => setLoadingSlots(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date, selectedBarber]);
-
-  const selectedServiceObjects = services.filter((s) => selectedServices.includes(s.id));
-  const totalPrice = selectedServiceObjects.reduce((sum, s) => sum + Number(s.price), 0);
-  const totalDuration = selectedServiceObjects.reduce((sum, s) => sum + s.durationMinutes, 0);
-  const categories = [...new Set(services.map((s) => s.category))];
-  const selectedBarberObj = barbers.find((b) => b.id === selectedBarber);
-  const [mobileCartOpen, setMobileCartOpen] = useState(false);
+  }, [date, selectedBarber, totalDuration]);
 
   // Auto-switch active category tab when scrolling
   const isManualScroll = useRef(false);
@@ -156,6 +157,7 @@ export default function BookPage() {
 
   async function handleSubmit() {
     setSubmitting(true);
+    setSubmitError("");
     try {
       const scheduledAt = new Date(`${date}T${time}:00`).toISOString();
       const res = await fetch("/api/appointments", {
@@ -174,7 +176,15 @@ export default function BookPage() {
       });
       if (res.ok) {
         setSubmitted(true);
+      } else {
+        const data = await res.json().catch(() => null);
+        setSubmitError(
+          (data as { error?: string } | null)?.error ??
+            "Failed to book appointment. Please try again.",
+        );
       }
+    } catch {
+      setSubmitError("Network error. Please check your connection and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -264,7 +274,11 @@ export default function BookPage() {
                   stroke="currentColor"
                   aria-hidden="true"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                  />
                 </svg>
               )}
               <button
@@ -323,7 +337,11 @@ export default function BookPage() {
                     strokeWidth={2}
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                    />
                   </svg>
                 )}
               </button>
@@ -339,11 +357,7 @@ export default function BookPage() {
                   }}
                   className="flex-shrink-0 rounded-full bg-figaro-dark px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-figaro-black"
                 >
-                  {submitting
-                    ? "Booking..."
-                    : step === 3
-                      ? `Book — $${totalPrice}`
-                      : "Continue"}
+                  {submitting ? "Booking..." : step === 3 ? `Book — $${totalPrice}` : "Continue"}
                 </button>
               )}
             </div>
@@ -361,7 +375,9 @@ export default function BookPage() {
                   <div key={s.id} className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-figaro-black">{s.name}</p>
-                      <p className="text-xs text-figaro-black/40">{formatDuration(s.durationMinutes)}</p>
+                      <p className="text-xs text-figaro-black/40">
+                        {formatDuration(s.durationMinutes)}
+                      </p>
                     </div>
                     <p className="text-sm text-figaro-black/60">${Number(s.price)}</p>
                   </div>
@@ -393,8 +409,12 @@ export default function BookPage() {
                         onClick={() => {
                           isManualScroll.current = true;
                           setActiveCategory(cat);
-                          document.getElementById(`cat-${cat}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                          setTimeout(() => { isManualScroll.current = false; }, 800);
+                          document
+                            .getElementById(`cat-${cat}`)
+                            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          setTimeout(() => {
+                            isManualScroll.current = false;
+                          }, 800);
                         }}
                         className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
                           activeCategory === cat
@@ -410,84 +430,90 @@ export default function BookPage() {
 
                 {/* Service Cards — All Categories */}
                 {categories.map((cat) => (
-                    <div key={cat} id={`cat-${cat}`} className="mt-10 scroll-mt-[12rem] sm:scroll-mt-28">
-                      <h2 className="text-xl font-bold text-figaro-black">
-                        {CATEGORY_LABELS[cat] ?? cat}
-                      </h2>
-                      <div className="mt-5 space-y-5">
-                        {services
-                          .filter((s) => s.category === cat)
-                          .map((service) => {
-                            const isSelected = selectedServices.includes(service.id);
-                            return (
-                              <div
-                                key={service.id}
-                                className={`flex items-start justify-between rounded-lg border bg-white p-6 transition-all ${
-                                  isSelected
-                                    ? "border-figaro-gold shadow-sm"
-                                    : "border-figaro-black/10 hover:border-figaro-black/20"
-                                }`}
-                              >
-                                <div className="flex-1 pr-4">
-                                  <h3 className="font-semibold text-figaro-black">{service.name}</h3>
-                                  <p className="mt-0.5 text-sm text-figaro-black/70">
-                                    {formatDuration(service.durationMinutes)}
+                  <div
+                    key={cat}
+                    id={`cat-${cat}`}
+                    className="mt-10 scroll-mt-[12rem] sm:scroll-mt-28"
+                  >
+                    <h2 className="text-xl font-bold text-figaro-black">
+                      {CATEGORY_LABELS[cat] ?? cat}
+                    </h2>
+                    <div className="mt-5 space-y-5">
+                      {services
+                        .filter((s) => s.category === cat)
+                        .map((service) => {
+                          const isSelected = selectedServices.includes(service.id);
+                          return (
+                            <div
+                              key={service.id}
+                              className={`flex items-start justify-between rounded-lg border bg-white p-6 transition-all ${
+                                isSelected
+                                  ? "border-figaro-gold shadow-sm"
+                                  : "border-figaro-black/10 hover:border-figaro-black/20"
+                              }`}
+                            >
+                              <div className="flex-1 pr-4">
+                                <h3 className="font-semibold text-figaro-black">{service.name}</h3>
+                                <p className="mt-0.5 text-sm text-figaro-black/70">
+                                  {formatDuration(service.durationMinutes)}
+                                </p>
+                                {service.description && (
+                                  <p className="mt-1.5 line-clamp-2 text-sm text-figaro-black/70">
+                                    {service.description}
                                   </p>
-                                  {service.description && (
-                                    <p className="mt-1.5 line-clamp-2 text-sm text-figaro-black/70">
-                                      {service.description}
-                                    </p>
-                                  )}
-                                  <p className="mt-2.5 font-semibold text-figaro-black">
-                                    ${Number(service.price)}
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => toggleService(service.id)}
-                                  className={`mt-2 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-                                    isSelected
-                                      ? "border-figaro-gold bg-figaro-gold text-white"
-                                      : "border-figaro-black/20 text-figaro-black/40 hover:border-figaro-black/40"
-                                  }`}
-                                  aria-label={isSelected ? `Remove ${service.name}` : `Add ${service.name}`}
-                                >
-                                  {isSelected ? (
-                                    <svg
-                                      className="h-5 w-5"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      strokeWidth={2.5}
-                                      stroke="currentColor"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="m4.5 12.75 6 6 9-13.5"
-                                      />
-                                    </svg>
-                                  ) : (
-                                    <svg
-                                      className="h-5 w-5"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      strokeWidth={2}
-                                      stroke="currentColor"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M12 4.5v15m7.5-7.5h-15"
-                                      />
-                                    </svg>
-                                  )}
-                                </button>
+                                )}
+                                <p className="mt-2.5 font-semibold text-figaro-black">
+                                  ${Number(service.price)}
+                                </p>
                               </div>
-                            );
-                          })}
-                      </div>
+                              <button
+                                type="button"
+                                onClick={() => toggleService(service.id)}
+                                className={`mt-2 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                                  isSelected
+                                    ? "border-figaro-gold bg-figaro-gold text-white"
+                                    : "border-figaro-black/20 text-figaro-black/40 hover:border-figaro-black/40"
+                                }`}
+                                aria-label={
+                                  isSelected ? `Remove ${service.name}` : `Add ${service.name}`
+                                }
+                              >
+                                {isSelected ? (
+                                  <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={2.5}
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="m4.5 12.75 6 6 9-13.5"
+                                    />
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={2}
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M12 4.5v15m7.5-7.5h-15"
+                                    />
+                                  </svg>
+                                )}
+                              </button>
+                            </div>
+                          );
+                        })}
                     </div>
-                  ))}
+                  </div>
+                ))}
               </motion.div>
             )}
 
@@ -557,13 +583,25 @@ export default function BookPage() {
                         }`}
                         aria-label="Previous week"
                       >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15.75 19.5 8.25 12l7.5-7.5"
+                          />
                         </svg>
                       </button>
                       <button
                         type="button"
-                        onClick={() => setDatePageStart(Math.min(dateOptions.length - 7, datePageStart + 7))}
+                        onClick={() =>
+                          setDatePageStart(Math.min(dateOptions.length - 7, datePageStart + 7))
+                        }
                         disabled={datePageStart + 7 >= dateOptions.length}
                         className={`rounded-lg border p-2 transition-all ${
                           datePageStart + 7 >= dateOptions.length
@@ -572,8 +610,18 @@ export default function BookPage() {
                         }`}
                         aria-label="Next week"
                       >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -603,7 +651,9 @@ export default function BookPage() {
                   <div className="mt-8">
                     <h2 className="text-sm font-medium text-figaro-black/70">Available times</h2>
                     {loadingSlots ? (
-                      <p className="mt-4 text-sm text-figaro-black/40">Loading available times...</p>
+                      <p className="mt-4 text-sm text-figaro-black/40">
+                        Loading available times...
+                      </p>
                     ) : availableSlots.length === 0 ? (
                       <p className="mt-4 text-sm text-figaro-black/40">
                         No available slots for this date. Try another day.
@@ -639,7 +689,9 @@ export default function BookPage() {
                 transition={{ duration: 0.3 }}
               >
                 <h1 className="text-3xl font-bold text-figaro-black">Confirm Booking</h1>
-                <p className="mt-2 text-figaro-black/50">Enter your details to complete your booking</p>
+                <p className="mt-2 text-figaro-black/50">
+                  Enter your details to complete your booking
+                </p>
 
                 <div className="mt-6 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -736,7 +788,12 @@ export default function BookPage() {
                     </div>
                     <span className="text-xs text-figaro-black/40">(36)</span>
                   </div>
-                  <a href="https://maps.google.com/?q=114+Leucadia+Blvd,+Encinitas,+CA+92024" target="_blank" rel="noopener noreferrer" className="mt-0.5 block text-xs text-figaro-black/40 transition-colors hover:text-figaro-teal">
+                  <a
+                    href="https://maps.google.com/?q=114+Leucadia+Blvd,+Encinitas,+CA+92024"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-0.5 block text-xs text-figaro-black/40 transition-colors hover:text-figaro-teal"
+                  >
                     114 Leucadia Boulevard, Encinitas
                   </a>
                 </div>
@@ -757,9 +814,7 @@ export default function BookPage() {
                             {selectedBarberObj ? ` with ${selectedBarberObj.firstName}` : ""}
                           </p>
                         </div>
-                        <p className="text-sm font-medium text-figaro-black">
-                          ${Number(s.price)}
-                        </p>
+                        <p className="text-sm font-medium text-figaro-black">${Number(s.price)}</p>
                       </div>
                     ))}
                     {date && time && (
@@ -792,6 +847,12 @@ export default function BookPage() {
                   {totalPrice > 0 ? `$${totalPrice}` : "free"}
                 </span>
               </div>
+
+              {submitError && (
+                <p className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {submitError}
+                </p>
+              )}
 
               {/* Continue / Book Button */}
               <button

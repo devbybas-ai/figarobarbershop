@@ -67,7 +67,10 @@ export default function BarbersPage() {
         throw new Error(err.error ?? "Failed to add barber");
       }
 
-      setMessage({ type: "success", text: `${newFirstName} added! Default password: figaro2026` });
+      setMessage({
+        type: "success",
+        text: `${newFirstName} added! Share the temporary password with them directly.`,
+      });
       setShowAddForm(false);
       setNewFirstName("");
       setNewLastName("");
@@ -149,7 +152,7 @@ export default function BarbersPage() {
         <div className="mt-6 rounded-sm border border-figaro-teal/20 bg-figaro-dark p-6">
           <h3 className="text-lg font-semibold text-figaro-cream">Add New Barber</h3>
           <p className="mt-1 text-sm text-figaro-cream/50">
-            Creates a user account with default password: figaro2026
+            Creates a user account with a temporary password (set via environment config)
           </p>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>

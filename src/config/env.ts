@@ -1,19 +1,25 @@
 import { z } from "zod/v4";
 
 const envSchema = z.object({
-  DATABASE_URL: z.url(),
+  DATABASE_URL: z.string().min(1),
   NEXTAUTH_SECRET: z.string().min(32),
-  NEXTAUTH_URL: z.url(),
+  NEXTAUTH_URL: z.string().url(),
 
-  STRIPE_SECRET_KEY: z.string().startsWith("sk_"),
-  STRIPE_PUBLISHABLE_KEY: z.string().startsWith("pk_"),
-  STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_"),
+  // Stripe (optional until integration is live)
+  STRIPE_SECRET_KEY: z.string().startsWith("sk_").optional(),
+  STRIPE_PUBLISHABLE_KEY: z.string().startsWith("pk_").optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_").optional(),
 
-  INSTAGRAM_APP_ID: z.string().min(1),
-  INSTAGRAM_APP_SECRET: z.string().min(1),
-  INSTAGRAM_ACCESS_TOKEN: z.string().min(1),
+  // Instagram (optional until integration is live)
+  INSTAGRAM_APP_ID: z.string().min(1).optional(),
+  INSTAGRAM_APP_SECRET: z.string().min(1).optional(),
+  INSTAGRAM_ACCESS_TOKEN: z.string().min(1).optional(),
 
-  RESEND_API_KEY: z.string().startsWith("re_"),
+  // Resend (optional until email integration is live)
+  RESEND_API_KEY: z.string().startsWith("re_").optional(),
+
+  // Default password for new barber accounts
+  DEFAULT_BARBER_PASSWORD: z.string().min(8).optional(),
 
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });

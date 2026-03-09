@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { db } from "@/lib/db";
+import { apiRequireAuth } from "@/lib/auth-utils";
 import { z } from "zod/v4";
 
 const createClientSchema = z.object({
@@ -12,31 +13,41 @@ const createClientSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const search = searchParams.get("search");
+  const { error } = await apiRequireAuth("STAFF");
+  if (error) return error;
 
-  const where: Record<string, unknown> = { deletedAt: null };
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const search = searchParams.get("search");
 
-  if (search) {
-    where.OR = [
-      { firstName: { contains: search, mode: "insensitive" } },
-      { lastName: { contains: search, mode: "insensitive" } },
-      { email: { contains: search, mode: "insensitive" } },
-    ];
+    const where: Record<string, unknown> = { deletedAt: null };
+
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: "insensitive" } },
+        { lastName: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const clients = await db.client.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: { select: { appointments: true } },
+      },
+    });
+
+    return NextResponse.json(clients);
+  } catch {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  const clients = await db.client.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      _count: { select: { appointments: true } },
-    },
-  });
-
-  return NextResponse.json(clients);
 }
 
 export async function POST(request: NextRequest) {
+  const { error: authErr } = await apiRequireAuth("STAFF");
+  if (authErr) return authErr;
+
   try {
     const body: unknown = await request.json();
     const data = createClientSchema.parse(body);

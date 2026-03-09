@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { db } from "@/lib/db";
+import { apiRequireAuth } from "@/lib/auth-utils";
 import { z } from "zod/v4";
 
 const updateAppointmentSchema = z.object({
@@ -10,26 +11,36 @@ const updateAppointmentSchema = z.object({
 });
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { error } = await apiRequireAuth("STAFF");
+  if (error) return error;
 
-  const appointment = await db.appointment.findUnique({
-    where: { id },
-    include: {
-      client: true,
-      barber: true,
-      items: { include: { service: true } },
-      payment: true,
-    },
-  });
+  try {
+    const { id } = await params;
 
-  if (!appointment) {
-    return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
+    const appointment = await db.appointment.findUnique({
+      where: { id },
+      include: {
+        client: true,
+        barber: true,
+        items: { include: { service: true } },
+        payment: true,
+      },
+    });
+
+    if (!appointment) {
+      return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(appointment);
+  } catch {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  return NextResponse.json(appointment);
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { error: authError } = await apiRequireAuth("STAFF");
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const body: unknown = await request.json();

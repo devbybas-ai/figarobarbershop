@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
+import type { UserRole } from "@prisma/client";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { hasRole } from "@/lib/auth-utils";
 import { hash } from "bcryptjs";
 
+const DEFAULT_BARBER_PASSWORD = process.env.DEFAULT_BARBER_PASSWORD ?? "changeme123!";
+
 function ownerOnly(session: { user: { role: string } } | null) {
   if (!session?.user) return { error: "Unauthorized", status: 401 };
-  if (!hasRole(session.user.role as "OWNER", "OWNER")) return { error: "Forbidden", status: 403 };
+  if (!hasRole(session.user.role as UserRole, "OWNER")) return { error: "Forbidden", status: 403 };
   return null;
 }
 
@@ -33,9 +36,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Email already in use" }, { status: 409 });
   }
 
-  // Default password (owner should tell the barber to change it)
-  const defaultPassword = "figaro2026";
-  const passwordHash = await hash(defaultPassword, 12);
+  // Default password from env (owner should tell the barber to change it)
+  const passwordHash = await hash(DEFAULT_BARBER_PASSWORD, 12);
 
   // Create user + barber in a transaction
   const result = await db.$transaction(async (tx) => {
@@ -60,15 +62,16 @@ export async function POST(req: Request) {
       },
     });
 
-    // Create default schedule (Mon-Sat, 10:30-18:30, Sun off)
+    // Create default schedule (1=Mon..7=Sun, matching DB convention)
     const schedules = [];
-    for (let day = 0; day < 7; day++) {
+    for (let day = 1; day <= 7; day++) {
+      const isWeekend = day === 6 || day === 7; // Sat or Sun
       schedules.push({
         barberId: barber.id,
         dayOfWeek: day,
-        startTime: day === 0 || day === 6 ? "10:00" : "10:30",
-        endTime: day === 0 || day === 6 ? "16:00" : "18:30",
-        isOff: day === 0,
+        startTime: isWeekend ? "10:00" : "10:30",
+        endTime: isWeekend ? "16:00" : "18:30",
+        isOff: day === 7, // Sunday off
       });
     }
     await tx.barberSchedule.createMany({ data: schedules });

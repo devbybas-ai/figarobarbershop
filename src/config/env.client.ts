@@ -1,8 +1,8 @@
 import { z } from "zod/v4";
 
 const clientEnvSchema = z.object({
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().startsWith("pk_"),
-  NEXT_PUBLIC_APP_URL: z.url(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().startsWith("pk_").optional(),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
 });
 
 function validateClientEnv() {

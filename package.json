@@ -22,8 +22,6 @@
     "quality": "pnpm type-check && pnpm lint && pnpm format:check && pnpm test && pnpm build"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.11.1",
-    "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^6.19.2",
     "bcryptjs": "^3.0.3",
     "motion": "^12.35.0",
@@ -31,7 +29,6 @@
     "next-auth": "5.0.0-beta.30",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-hook-form": "^7.71.2",
     "recharts": "^3.8.0",
     "resend": "^6.9.3",
     "stripe": "^20.4.1",

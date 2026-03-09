@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { db } from "@/lib/db";
+import { apiRequireAuth } from "@/lib/auth-utils";
 import { stripe } from "@/lib/stripe";
 import { z } from "zod/v4";
 
@@ -10,6 +11,9 @@ const createPaymentSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const { error: authErr } = await apiRequireAuth("STAFF");
+  if (authErr) return authErr;
+
   try {
     const body: unknown = await request.json();
     const data = createPaymentSchema.parse(body);

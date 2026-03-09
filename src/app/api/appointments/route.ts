@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { db } from "@/lib/db";
+import { apiRequireAuth } from "@/lib/auth-utils";
 import { z } from "zod/v4";
 
 const createAppointmentSchema = z.object({
@@ -83,32 +84,39 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const date = searchParams.get("date");
-  const barberId = searchParams.get("barberId");
+  const { error } = await apiRequireAuth("STAFF");
+  if (error) return error;
 
-  const where: Record<string, unknown> = {};
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const date = searchParams.get("date");
+    const barberId = searchParams.get("barberId");
 
-  if (date) {
-    const start = new Date(date);
-    const end = new Date(date);
-    end.setDate(end.getDate() + 1);
-    where.scheduledAt = { gte: start, lt: end };
+    const where: Record<string, unknown> = {};
+
+    if (date) {
+      const start = new Date(date);
+      const end = new Date(date);
+      end.setDate(end.getDate() + 1);
+      where.scheduledAt = { gte: start, lt: end };
+    }
+
+    if (barberId) {
+      where.barberId = barberId;
+    }
+
+    const appointments = await db.appointment.findMany({
+      where,
+      include: {
+        client: true,
+        barber: true,
+        items: { include: { service: true } },
+      },
+      orderBy: { scheduledAt: "asc" },
+    });
+
+    return NextResponse.json(appointments);
+  } catch {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  if (barberId) {
-    where.barberId = barberId;
-  }
-
-  const appointments = await db.appointment.findMany({
-    where,
-    include: {
-      client: true,
-      barber: true,
-      items: { include: { service: true } },
-    },
-    orderBy: { scheduledAt: "asc" },
-  });
-
-  return NextResponse.json(appointments);
 }

@@ -41,27 +41,10 @@ body {
   color: var(--foreground);
 }
 
-/* Auto-scrolling marquee for gallery strip */
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 30s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-
 /* Horizontal bounce arrow for CTA hint */
 @keyframes bounce-x {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
   50% {

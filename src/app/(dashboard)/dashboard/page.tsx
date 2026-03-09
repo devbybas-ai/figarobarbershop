@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
+import { formatCurrency, formatTime } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -67,18 +68,6 @@ async function getDashboardStats() {
     recentAppointments,
     lowStockProducts,
   };
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
-}
-
-function formatTime(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).format(new Date(date));
 }
 
 export default async function DashboardPage() {

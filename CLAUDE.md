@@ -11,7 +11,7 @@ Full-stack barbershop command center for Figaro Barbershop Leucadia. Public-faci
 | Layer           | Choice                   |
 | --------------- | ------------------------ |
 | Language        | TypeScript (strict)      |
-| Framework       | Next.js 15 (App Router)  |
+| Framework       | Next.js 16 (App Router)  |
 | Styling         | Tailwind CSS 4           |
 | Animation       | Motion (Framer Motion)   |
 | Database        | PostgreSQL (self-hosted) |
@@ -28,7 +28,7 @@ Full-stack barbershop command center for Figaro Barbershop Leucadia. Public-faci
 - Stripe Connect (payments)
 - Instagram Graph API (feed integration)
 - Recharts (dashboard visualizations)
-- React Hook Form + Zod (forms + validation)
+- Zod (schema validation)
 - Resend (transactional emails)
 - node-cron (scheduled tasks)
 

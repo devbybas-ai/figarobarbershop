@@ -44,7 +44,9 @@ function LoginForm() {
     <div className="flex min-h-[80vh] items-center justify-center bg-figaro-cream px-4">
       <div className="w-full max-w-sm">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-figaro-black">Barbershop Administration</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-figaro-black">
+            Barbershop Administration
+          </h2>
           <p className="mt-2 text-sm text-figaro-black/60">
             Sign in to Figaro Barbershop dashboard
           </p>

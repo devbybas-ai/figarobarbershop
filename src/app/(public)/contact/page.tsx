@@ -46,7 +46,12 @@ export default function ContactPage() {
               <address className="mt-4 space-y-3 not-italic text-figaro-black/70">
                 <div>
                   <p className="font-medium text-figaro-black">Figaro Barbershop Leucadia</p>
-                  <a href="https://maps.google.com/?q=114+Leucadia+Blvd,+Encinitas,+CA+92024" target="_blank" rel="noopener noreferrer" className="block transition-colors hover:text-figaro-teal">
+                  <a
+                    href="https://maps.google.com/?q=114+Leucadia+Blvd,+Encinitas,+CA+92024"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block transition-colors hover:text-figaro-teal"
+                  >
                     <p>114 Leucadia Blvd</p>
                     <p>Encinitas, CA 92024</p>
                   </a>

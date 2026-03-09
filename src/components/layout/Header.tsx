@@ -42,21 +42,24 @@ export function Header() {
 
           {/* CTA */}
           <div className="hidden items-center gap-4 md:flex">
-            <span className="text-sm text-figaro-cream/50">View Services</span>
-            <svg
-              className="h-4 w-4 animate-bounce-x text-figaro-gold"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
+            <span className="flex items-center gap-1 text-sm animate-bounce-x text-figaro-cream/50">
+              View Services
+              <svg
+                className="h-4 w-4 animate-bounce-x text-figaro-gold"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+              </svg>
+            </span>
             <Link
               href="/book"
               className="rounded-sm bg-figaro-gold px-5 py-2.5 text-sm font-semibold text-figaro-dark transition-colors hover:bg-figaro-gold-light"
             >
-              Book Appointment
+              Services
             </Link>
           </div>
 
@@ -113,7 +116,7 @@ export function Header() {
                 className="block rounded-sm bg-figaro-gold px-3 py-2.5 text-center text-base font-semibold text-figaro-dark transition-colors hover:bg-figaro-gold-light"
                 onClick={() => setMobileOpen(false)}
               >
-                Book Appointment
+                Services
               </Link>
             </div>
           </div>

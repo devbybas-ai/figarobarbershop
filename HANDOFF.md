@@ -1,7 +1,7 @@
 # Figaro Command Center - Session Handoff
 
-> Last updated: 2026-03-06
-> Session: 6 (complete)
+> Last updated: 2026-03-08
+> Session: 7 (complete)
 
 ## Current State
 
@@ -140,19 +140,59 @@
 - **Booking sidebar logo fix**: Changed from `object-cover` (clipping) to `object-contain`, increased size h-14→h-16, increased sticky offset top-24→top-32
 - **Service card text contrast**: Duration and description opacity bumped from /50 and /60 to /70 for better readability
 
+### Done (Session 7)
+
+- **Full-scale audit across all Eight Pillars** — 18 issues found and resolved:
+- **Security (Critical)**:
+  - Added `apiRequireAuth()` helper to `auth-utils.ts` for API route guards
+  - Added auth to 5 unprotected API routes: appointments GET, clients GET/POST, inventory GET, payments POST, appointments/[id] PATCH
+  - Moved default barber password from hardcoded source to `DEFAULT_BARBER_PASSWORD` env var
+  - Removed hardcoded password display from barber management UI
+- **Security (Low)**:
+  - Added `preload` directive to HSTS header
+  - Removed server-only Resend URL from CSP `connect-src`
+- **Bugs (High)**:
+  - Fixed day-of-week mismatch in barber schedule creation (0-based → 1-based to match seed/availability convention)
+  - Fixed `ownerOnly` type cast bug: `as "OWNER"` → `as UserRole`
+- **Structure (High)**:
+  - Added error boundaries: `error.tsx`, `loading.tsx`, `not-found.tsx` at app root and dashboard level
+- **UX (High)**:
+  - Added error state + user feedback to booking form (was silently failing)
+- **UX (Medium)**:
+  - Fixed dead `/about` link in footer → changed to `/intake` (New Client Form)
+- **Performance (Medium)**:
+  - Added viewport configuration to root layout (width, initialScale, themeColor)
+- **Code Quality (Medium)**:
+  - Added try/catch to 6 API routes missing error handling (barbers, barbers/[slug], services, clients GET, inventory, appointments/[id] GET)
+  - Made Stripe/Instagram/Resend env vars optional (not yet integrated)
+  - Made client env vars optional
+- **Code Quality (Low)**:
+  - Removed duplicate `formatCurrency`/`formatTime` from dashboard page (imported from utils)
+  - Fixed `totalDuration` missing from useEffect dependency array in book page
+  - Removed unused CSS marquee animation from globals.css
+  - Removed 3 unused dependencies: `@auth/prisma-adapter`, `react-hook-form`, `@hookform/resolvers`
+- **Docs**:
+  - Fixed CLAUDE.md: "Next.js 15" → "Next.js 16", removed React Hook Form reference
+  - Updated .env.example with `DEFAULT_BARBER_PASSWORD`, documented optional sections
+  - Full AUDIT.md rewrite with all issues, health scores, security posture, tech debt register
+- **Reverted** Header "View Services" link change (was intentionally non-clickable as visual CTA hint)
+- All quality gates passing: type-check (0), lint (0), format (clean), test (6/6), build (32 routes, 0 errors)
+
 ### Blockers
 
 - None
 
-### Next Steps (Session 7)
+### Next Steps (Session 8)
 
 1. Integrate Instagram Graph API for live feed on public site
 2. Integrate Stripe Connect for real payments
-3. Build analytics dashboard with real Recharts data (currently sample data)
-4. Convert barber photos to avif for performance optimization
-5. Add E2E tests for login flow, booking flow, intake form
-6. Add more unit tests for API routes and auth helpers
-7. Individual barber profile pages: consider adding "Book with [name]" flow that pre-selects the barber
+3. Build analytics dashboard with real Recharts data (currently sample data — TD-004)
+4. Refactor book/page.tsx into step components (845 lines — TD-005)
+5. Move barber profile hardcoded data maps into DB fields (TD-006)
+6. Add rate limiting on login and public form endpoints (TD-008)
+7. Add E2E tests for login flow, booking flow, intake form
+8. Add more unit tests for API routes and auth helpers
+9. Convert barber photos to avif for performance optimization
 
 ## Decisions Made
 
@@ -188,3 +228,4 @@
 | 4b      | 2026-03-08 | Continued homepage polish: removed services section, smoothed scroll animations, tested logo placement. Ready for VPS deployment.                                                                                                                       |
 | 5       | 2026-03-08 | VPS deployed. Booking UX overhaul (mobile cart, date picker, scroll-to-top). Availability API fixed. Header nav cleanup. Contact CTAs. Barber profile hero backgrounds. Mobile homepage improvements.                                                   |
 | 6       | 2026-03-08 | Google Maps address links. Mandatory email/phone on booking + intake. Booking sidebar logo fix. Service card text contrast improvement.                                                                                                                 |
+| 7       | 2026-03-08 | Full-scale audit. 18 issues fixed across security (API auth, HSTS, CSP), bugs (day-of-week, type cast), UX (error boundaries, booking feedback), code quality (try/catch, unused deps, env validation), docs. All quality gates passing.               |
