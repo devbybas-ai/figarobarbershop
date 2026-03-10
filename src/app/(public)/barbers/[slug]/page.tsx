@@ -11,6 +11,9 @@ interface BarberProfile {
   lastName: string;
   bio: string | null;
   phone: string | null;
+  title: string | null;
+  tagline: string | null;
+  specialties: string[];
   instagram: string | null;
   facebook: string | null;
   tiktok: string | null;
@@ -30,33 +33,6 @@ const BARBER_IMAGES: Record<string, string> = {
   johnny: "/images/gallery/Johnny.webp",
   david: "/images/gallery/David.webp",
   austin: "/images/gallery/Austin.webp",
-};
-
-const BARBER_ROLES: Record<string, string> = {
-  ricardo: "Master Barber & Owner",
-  zeke: "Master Barber",
-  bryam: "Barber",
-  johnny: "Barber",
-  david: "Barber",
-  austin: "Barber",
-};
-
-const BARBER_SPECIALTIES: Record<string, string[]> = {
-  ricardo: ["Classic Cuts", "Straight Razor Shaves", "Hot Towel Treatment", "Beard Sculpting"],
-  zeke: ["Modern Fades", "Classic Styles", "Scissor Work", "Beard Grooming"],
-  bryam: ["Precision Fades", "Clean Lines", "Skin Fades", "Edge Work"],
-  johnny: ["Creative Cuts", "Textured Styles", "Freehand Design", "Color Work"],
-  david: ["Textured Cuts", "Beard Work", "Taper Fades", "Hot Towel Shaves"],
-  austin: ["Sharp Fades", "Detail Work", "Bald Fades", "Line-Ups"],
-};
-
-const BARBER_TAGLINES: Record<string, string> = {
-  ricardo: "Where every cut tells a story. 20+ years of mastering the craft.",
-  zeke: "Blending tradition with modern style. Your vision, perfected.",
-  bryam: "Precision is not just a skill — it's a standard.",
-  johnny: "Energy, creativity, and a fresh cut every time.",
-  david: "Texture, detail, and a look that lasts.",
-  austin: "Sharp lines, clean fades, zero compromise.",
 };
 
 const HERO_BACKGROUNDS: Record<string, string> = {
@@ -189,9 +165,9 @@ export default function BarberProfilePage({ params }: { params: Promise<{ slug: 
 
   const slugLower = slug.toLowerCase();
   const image = BARBER_IMAGES[slugLower];
-  const role = BARBER_ROLES[slugLower] ?? "Barber";
-  const specialties = BARBER_SPECIALTIES[slugLower] ?? [];
-  const tagline = BARBER_TAGLINES[slugLower] ?? "";
+  const role = barber.title ?? "Barber";
+  const specialties = barber.specialties ?? [];
+  const tagline = barber.tagline ?? "";
   const heroBg = HERO_BACKGROUNDS[slugLower];
   const heroBgPosition = HERO_BG_POSITION[slugLower] ?? "center 25%";
   const portfolio = PORTFOLIO_MAP[slugLower] ?? [];

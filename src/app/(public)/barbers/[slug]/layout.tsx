@@ -12,24 +12,6 @@ const BARBER_IMAGES: Record<string, string> = {
   austin: "/images/gallery/Austin.webp",
 };
 
-const BARBER_ROLES: Record<string, string> = {
-  ricardo: "Master Barber & Owner",
-  zeke: "Master Barber",
-  bryam: "Barber",
-  johnny: "Barber",
-  david: "Barber",
-  austin: "Barber",
-};
-
-const BARBER_SPECIALTIES: Record<string, string[]> = {
-  ricardo: ["Classic Cuts", "Straight Razor Shaves", "Hot Towel Treatment", "Beard Sculpting"],
-  zeke: ["Modern Fades", "Classic Styles", "Scissor Work", "Beard Grooming"],
-  bryam: ["Precision Fades", "Clean Lines", "Skin Fades", "Edge Work"],
-  johnny: ["Creative Cuts", "Textured Styles", "Freehand Design", "Color Work"],
-  david: ["Textured Cuts", "Beard Work", "Taper Fades", "Hot Towel Shaves"],
-  austin: ["Sharp Fades", "Detail Work", "Bald Fades", "Line-Ups"],
-};
-
 export async function generateMetadata({
   params,
 }: {
@@ -43,7 +25,7 @@ export async function generateMetadata({
       firstName: { equals: slug, mode: "insensitive" },
       isActive: true,
     },
-    select: { firstName: true, bio: true },
+    select: { firstName: true, bio: true, title: true, specialties: true },
   });
 
   if (!barber) {
@@ -51,8 +33,8 @@ export async function generateMetadata({
   }
 
   const name = barber.firstName;
-  const role = BARBER_ROLES[slugLower] ?? "Barber";
-  const specialties = BARBER_SPECIALTIES[slugLower] ?? [];
+  const role = barber.title ?? "Barber";
+  const specialties = barber.specialties ?? [];
   const image = BARBER_IMAGES[slugLower];
   const specialtiesText = specialties.join(", ");
 
@@ -90,9 +72,17 @@ export default async function BarberProfileLayout({
 }) {
   const { slug } = await params;
   const slugLower = slug.toLowerCase();
-  const role = BARBER_ROLES[slugLower] ?? "Barber";
   const image = BARBER_IMAGES[slugLower] ?? "";
   const name = slug.charAt(0).toUpperCase() + slug.slice(1).toLowerCase();
+
+  const barberData = await db.barber.findFirst({
+    where: {
+      firstName: { equals: slug, mode: "insensitive" },
+      isActive: true,
+    },
+    select: { title: true },
+  });
+  const role = barberData?.title ?? "Barber";
 
   return (
     <>

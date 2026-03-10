@@ -8,7 +8,7 @@ const createAppointmentSchema = z.object({
   clientFirstName: z.string().min(1),
   clientLastName: z.string().min(1),
   clientEmail: z.email().optional(),
-  clientPhone: z.string().optional(),
+  clientPhone: z.string().min(1),
   barberId: z.string().min(1),
   serviceIds: z.array(z.string()).min(1),
   scheduledAt: z.iso.datetime(),
@@ -21,12 +21,25 @@ export async function POST(request: NextRequest) {
     const body: unknown = await request.json();
     const data = createAppointmentSchema.parse(body);
 
-    // Find or create client
+    // Find or create client (restore if soft-deleted)
     let client = data.clientEmail
       ? await db.client.findUnique({ where: { email: data.clientEmail } })
       : null;
 
-    if (!client) {
+    if (client) {
+      // Restore soft-deleted client and update info
+      if (client.deletedAt) {
+        client = await db.client.update({
+          where: { id: client.id },
+          data: {
+            firstName: data.clientFirstName,
+            lastName: data.clientLastName,
+            phone: data.clientPhone ?? client.phone,
+            deletedAt: null,
+          },
+        });
+      }
+    } else {
       client = await db.client.create({
         data: {
           firstName: data.clientFirstName,

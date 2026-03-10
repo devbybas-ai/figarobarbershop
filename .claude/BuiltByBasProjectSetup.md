@@ -1797,11 +1797,11 @@ Score this document quarterly:
 
 Every change to this document must be logged:
 
-| Date       | Section          | What Changed                                                                                         | Why (what triggered it)                                                         |
-| ---------- | ---------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| 2026-03-09 | Step 2           | PostgreSQL self-hosted as default DB, removed Supabase as example. Auth.js replaces Supabase Auth     | Studio preference: PostgreSQL always, no more Supabase                          |
-| 2026-03-09 | Step 6 (NEW)     | Added Infrastructure Foundation: 6a GitHub, 6b PostgreSQL, 6c NGINX, 6d SEO -- full setup guides     | Missing practical how-to for foundational infrastructure that every project needs |
-| 2026-03-09 | Step 7 (was 6)   | Updated Project Ready display to include infrastructure status section                                | Reflects new Step 6 infrastructure requirements                                 |
+| Date       | Section        | What Changed                                                                                      | Why (what triggered it)                                                           |
+| ---------- | -------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 2026-03-09 | Step 2         | PostgreSQL self-hosted as default DB, removed Supabase as example. Auth.js replaces Supabase Auth | Studio preference: PostgreSQL always, no more Supabase                            |
+| 2026-03-09 | Step 6 (NEW)   | Added Infrastructure Foundation: 6a GitHub, 6b PostgreSQL, 6c NGINX, 6d SEO -- full setup guides  | Missing practical how-to for foundational infrastructure that every project needs |
+| 2026-03-09 | Step 7 (was 6) | Updated Project Ready display to include infrastructure status section                            | Reflects new Step 6 infrastructure requirements                                   |
 
 ---
 

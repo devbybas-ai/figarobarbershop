@@ -22,29 +22,92 @@ const STATUS_COLORS: Record<string, string> = {
   NO_SHOW: "bg-gray-500/20 text-gray-400",
 };
 
+function shiftDate(dateStr: string, days: number): string {
+  const d = new Date(dateStr + "T12:00:00");
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split("T")[0] ?? "";
+}
+
+function formatDisplayDate(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00");
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (d.toDateString() === today.toDateString()) return "Today";
+  if (d.toDateString() === tomorrow.toDateString()) return "Tomorrow";
+  if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+
+  return d.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0] ?? "");
+  const [loading, setLoading] = useState(true);
+  const todayStr = new Date().toISOString().split("T")[0] ?? "";
+  const [selectedDate, setSelectedDate] = useState(todayStr);
+
+  function changeDate(d: string) {
+    setLoading(true);
+    setSelectedDate(d);
+  }
 
   useEffect(() => {
     if (selectedDate) {
       fetch(`/api/appointments?date=${selectedDate}`)
         .then((r) => r.json())
         .then(setAppointments)
-        .catch(() => setAppointments([]));
+        .catch(() => setAppointments([]))
+        .finally(() => setLoading(false));
     }
   }, [selectedDate]);
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-bold text-figaro-cream">Appointments</h2>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="rounded-sm border border-figaro-gold/20 bg-figaro-dark px-3 py-2 text-figaro-cream focus:border-figaro-gold focus:outline-none"
-        />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => changeDate(todayStr)}
+            className={`rounded-sm border px-3 py-2 text-sm font-medium transition-colors ${
+              selectedDate === todayStr
+                ? "border-figaro-gold bg-figaro-gold/10 text-figaro-gold"
+                : "border-figaro-gold/20 text-figaro-cream/60 hover:border-figaro-gold/40 hover:text-figaro-cream"
+            }`}
+          >
+            Today
+          </button>
+          <button
+            onClick={() => changeDate(shiftDate(selectedDate, -1))}
+            className="rounded-sm border border-figaro-gold/20 px-3 py-2 text-figaro-cream/60 transition-colors hover:border-figaro-gold/40 hover:text-figaro-cream"
+            aria-label="Previous day"
+          >
+            &larr;
+          </button>
+          <span className="min-w-[100px] text-center text-sm font-medium text-figaro-cream">
+            {formatDisplayDate(selectedDate)}
+          </span>
+          <button
+            onClick={() => changeDate(shiftDate(selectedDate, 1))}
+            className="rounded-sm border border-figaro-gold/20 px-3 py-2 text-figaro-cream/60 transition-colors hover:border-figaro-gold/40 hover:text-figaro-cream"
+            aria-label="Next day"
+          >
+            &rarr;
+          </button>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => changeDate(e.target.value)}
+            className="rounded-sm border border-figaro-gold/20 bg-figaro-dark px-3 py-2 text-figaro-cream focus:border-figaro-gold focus:outline-none"
+          />
+        </div>
       </div>
 
       <div className="mt-6 overflow-hidden rounded-sm border border-figaro-gold/10">
@@ -72,10 +135,16 @@ export default function AppointmentsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-figaro-gold/5">
-            {appointments.length === 0 ? (
+            {loading ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-figaro-cream/40">
-                  No appointments for this date
+                  Loading...
+                </td>
+              </tr>
+            ) : appointments.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-figaro-cream/40">
+                  No appointments for {formatDisplayDate(selectedDate).toLowerCase()}
                 </td>
               </tr>
             ) : (

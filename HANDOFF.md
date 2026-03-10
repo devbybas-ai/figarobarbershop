@@ -1,7 +1,7 @@
 # Figaro Command Center - Session Handoff
 
 > Last updated: 2026-03-09
-> Session: 9 (in progress)
+> Session: 11 (complete)
 
 ## Current State
 
@@ -229,23 +229,87 @@
   - `DELETE /api/clients/[id]` — OWNER-only soft delete (sets `deletedAt`)
 - All quality gates passing: type-check (0), lint (0), format (clean), build (34 routes)
 
+### Done (Session 10)
+
+- **Backend API review**: Systematically tested all 17+ API endpoints via curl with auth flow
+- **Appointment date navigation**: Added prev/next day arrows, Today button, and date label to appointments page
+- **Register/POS page** (`/dashboard/register`): Full front-desk system with 4 views:
+  - Today's Queue with status chips (Waiting/In Chair/Done/Paid) and action buttons (Start, Complete, Checkout, No Show)
+  - Walk-in form: client selection from recent intakes, barber tap-select, service multi-select, mandatory phone
+  - Checkout: Cash/Card payment processing
+  - QR Code: scannable QR pointing to `/intake` for walk-in self-registration
+  - Auto-refreshes queue every 30 seconds, summary chips for queue status
+- **Services full CRUD**: Add, edit, remove services from dashboard (previously read-only)
+  - `POST /api/services` (OWNER only) — create new service with Zod validation
+  - `PATCH/DELETE /api/services/[id]` (OWNER only) — update or soft-delete (isActive: false)
+  - Two-click delete confirmation in UI
+- **My Profile page fixed**: Barber lookup changed from broken name-based slug to userId matching
+- **Profile photo upload system**:
+  - `POST /api/upload` — file upload endpoint (JPEG/PNG/WebP/AVIF, max 5MB, STAFF+ role)
+  - Saves to `public/images/barbers/` with safe filename pattern
+  - Upload UI with 136x136 preview, click-to-upload zone, best practices guidance
+- **Intake form kiosk mode**: Auto-resets after 8 seconds for iPad front-desk use
+- **Soft-delete client re-registration bug fixed**: Clearing `deletedAt` on re-intake and appointment creation so soft-deleted clients can re-register
+- **Sidebar updated**: Added "Register" nav item, moved "My Profile" before "Settings"
+- **Policy pages created** (3 new public pages):
+  - `/privacy` — Privacy Policy (data collection, usage, retention, rights, photos/media)
+  - `/terms` — Terms of Service (services, appointments, pricing, payment, conduct, liability)
+  - `/cancellation-policy` — Cancellation Policy (2hr notice, late arrivals, no-shows)
+- **Intake form policy links**: "By submitting this form, you agree to our..." with links to all 3 policies (open in new tab to preserve kiosk flow)
+- **Test data cleanup**: Removed all test appointments, payments, and appointment items. Hard-deleted 3 test clients. Removed 5 fake seed clients. Only real client (Bas Rosario) remains.
+- **Added dependency**: `qrcode.react@^4.2.0` for QR code generation
+- All changes type-check clean (0 errors)
+
+### Done (Session 11)
+
+- **Owner master access**: Ricardo (OWNER) can edit his own name + edit other barbers' profiles (firstName, lastName, commissionRate, title, tagline, specialties)
+  - `PATCH /api/barbers/[slug]/profile` expanded with `OWNER_EXTRA_FIELDS`
+  - My Profile page: owner sees editable name fields, non-owners see disabled field
+  - Barbers management page: inline edit form for owner with all editable fields
+- **Full inventory CRUD**: Add/edit/restock/delete products from dashboard
+  - `POST /api/inventory` — create product + inventory item in transaction
+  - `PATCH /api/inventory/[id]` — update product fields and/or inventory (quantity, reorderLevel)
+  - `DELETE /api/inventory/[id]` — smart delete (soft-delete if order references, hard delete otherwise)
+  - Dashboard UI: add product form, inline edit, restock quick-action, delete with confirmation
+- **Rate limiting (TD-008)**: Edge-compatible sliding-window rate limiter in middleware
+  - Login: 5 req/min, Intake: 10/min, Booking: 10/min per IP
+  - Returns 429 with Retry-After header
+  - In-memory Map store with lazy cleanup (no setInterval)
+- **Analytics with real data (TD-004)**: Dashboard wired to live DB queries
+  - `GET /api/analytics?range=week|month` — summary stats, revenue by day, service breakdown, top barbers
+  - Period-over-period comparison (current vs previous week/month)
+  - Week/Month toggle, dynamic summary cards with change indicators
+  - Revenue by Day bar chart, Service Breakdown pie chart, Top Barbers leaderboard
+- **Barber data maps → DB fields (TD-006)**: title, tagline, specialties moved from hardcoded maps to Prisma schema
+  - Added `title`, `tagline`, `specialties` fields to Barber model
+  - Updated seed with real data for all 6 barbers
+  - Public barber pages + layout SEO now read from DB (removed 3 hardcoded maps)
+  - Image maps (BARBER_IMAGES, HERO_BACKGROUNDS, PORTFOLIO_MAP) remain as-is (filesystem assets)
+  - Owner can edit title/tagline/specialties via profile API
+- **Book page refactor (TD-005)**: 902-line monolith split into 8 focused files
+  - `src/components/public/booking/` — StepServices, StepProfessional, StepTime, StepConfirm, BookingSidebar, BookingSuccess, types
+  - Parent page: 281 lines (state + data fetching + navigation)
+  - No file over 281 lines
+- **Lint fixes**: Fixed `react-hooks/set-state-in-effect` in analytics and appointments pages
+- **Seed fix**: Added `payment.deleteMany()` before appointments to fix FK constraint on re-seed
+- All quality gates passing: type-check (0), lint (0), format (clean), test (6/6), build (44 routes)
+
 ### Blockers
 
 - None
 
-### Next Steps (Session 10)
+### Next Steps (Session 12)
 
 1. Review 2 borderline images flagged in Session 8 (owner confirmation needed)
 2. Integrate Instagram Graph API for live feed on public site
 3. Integrate Stripe Connect for real payments (pending owner decision on Fresha vs custom)
-4. Build analytics dashboard with real Recharts data (currently sample data — TD-004)
-5. Refactor book/page.tsx into step components (845 lines — TD-005)
-6. Move barber profile hardcoded data maps into DB fields (TD-006)
-7. Add rate limiting on login and public form endpoints (TD-008)
-8. Add E2E tests for login flow, booking flow, intake form
-9. Add more unit tests for API routes and auth helpers
-10. Convert barber photos to avif for performance optimization
-11. Configure Resend for production email delivery (intake emails, booking confirmations)
+4. Barber onboarding flow: proper password setup process when Ricardo adds a barber (depends on Resend)
+5. Add E2E tests for login flow, booking flow, intake form
+6. Add more unit tests for API routes and auth helpers
+7. Convert barber photos to avif for performance optimization
+8. Configure Resend for production email delivery (intake emails, booking confirmations)
+9. Register/POS page fine-tuning
+10. SME agent list for BuiltByBasProjectSetup
 
 ## Decisions Made
 
@@ -286,4 +350,6 @@
 | 6       | 2026-03-08 | Google Maps address links. Mandatory email/phone on booking + intake. Booking sidebar logo fix. Service card text contrast improvement.                                                                                                                              |
 | 7       | 2026-03-08 | Full-scale audit. 18 issues fixed across security (API auth, HSTS, CSP), bugs (day-of-week, type cast), UX (error boundaries, booking feedback), code quality (try/catch, unused deps, env validation), docs. All quality gates passing.                             |
 | 8       | 2026-03-09 | Premium SEO (JSON-LD, OpenGraph, sitemap, robots, per-page metadata, dynamic barber metadata). AI engine optimization (llms.txt, FAQ JSON-LD). Children's photos removed. Intake form updates (removed hair type, added Fresha referral). All quality gates passing. |
-| 9       | 2026-03-09 | Fixed Sunday schedule bug on barber profiles. VPS production debugging (UntrustedHost, corrupted build). Send Intake button with email/link delivery. Client soft-delete (OWNER only). Intake form pre-fill from query params. All quality gates passing.             |
+| 9       | 2026-03-09 | Fixed Sunday schedule bug on barber profiles. VPS production debugging (UntrustedHost, corrupted build). Send Intake button with email/link delivery. Client soft-delete (OWNER only). Intake form pre-fill from query params. All quality gates passing.            |
+| 10      | 2026-03-09 | Backend review + major feature build. Register/POS page, services CRUD, My Profile fix + photo upload, intake kiosk mode, policy pages (privacy/terms/cancellation), soft-delete re-registration fix, test data cleanup. Type-check clean.                           |
+| 11      | 2026-03-09 | Backend completion. Owner master access, inventory CRUD, rate limiting, real analytics, barber DB fields, book page refactor. 5 tech debt items resolved (TD-004/005/006/008). All 5 quality gates passing.                                                           |

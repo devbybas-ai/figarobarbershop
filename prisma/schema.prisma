@@ -82,7 +82,10 @@ model Barber {
   firstName       String
   lastName        String
   phone           String?
+  title           String?
   bio             String?
+  tagline         String?
+  specialties     String[]         @default([])
   imageUrl        String?
   instagram       String?
   facebook        String?
