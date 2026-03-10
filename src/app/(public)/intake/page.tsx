@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 
 interface Barber {
@@ -10,10 +11,15 @@ interface Barber {
 }
 
 export default function IntakePage() {
+  const searchParams = useSearchParams();
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [barbers, setBarbers] = useState<Barber[]>([]);
+
+  // Pre-fill from query params (sent via Send Intake link)
+  const prefillEmail = searchParams.get("email") ?? "";
+  const prefillName = searchParams.get("name") ?? "";
 
   useEffect(() => {
     fetch("/api/barbers")
@@ -119,6 +125,7 @@ export default function IntakePage() {
                 name="firstName"
                 type="text"
                 required
+                defaultValue={prefillName}
                 className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
               />
             </div>
@@ -145,6 +152,7 @@ export default function IntakePage() {
               name="email"
               type="email"
               required
+              defaultValue={prefillEmail}
               className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
             />
           </div>
