@@ -1,7 +1,7 @@
 # Figaro Command Center - Session Handoff
 
 > Last updated: 2026-03-09
-> Session: 8 (in progress)
+> Session: 9 (in progress)
 
 ## Current State
 
@@ -216,11 +216,24 @@
   - "Walked by" changed to "Walked / Drove By"
 - All quality gates passing: type-check (0), lint (0), format (clean), test (6/6), build (32 routes + sitemap.xml + robots.txt)
 
+### Done (Session 9)
+
+- **Fixed barber profile Sunday schedule bug**: `DAY_NAMES`/`DAY_ABBREVIATIONS` were 0-indexed arrays but DB stores dayOfWeek 1-7 (Mon-Sun), causing `DAY_NAMES[7]` to be undefined. Switched to `Record<number, string>` keyed 1-7.
+- **VPS production debugging**: Diagnosed two production issues from server logs:
+  - `UntrustedHost` error — Auth.js rejecting raw IP requests. Fix: `AUTH_TRUST_HOST=true` in VPS `.env`
+  - Corrupted `.next` build — missing `required-server-files.json`. Fix: clean rebuild on VPS
+- **Send Intake feature**: Clients without completed intake now show a "Send Intake" button on the Clients dashboard page
+  - `POST /api/clients/send-intake` — generates pre-filled intake link, sends branded email via Resend if configured, otherwise returns copyable link for staff to share manually
+  - Intake form (`/intake`) now accepts `?email=&name=` query params to pre-fill fields
+- **Client soft-delete**: Owner-only "Delete" button on Clients page with confirmation dialog
+  - `DELETE /api/clients/[id]` — OWNER-only soft delete (sets `deletedAt`)
+- All quality gates passing: type-check (0), lint (0), format (clean), build (34 routes)
+
 ### Blockers
 
 - None
 
-### Next Steps (Session 9)
+### Next Steps (Session 10)
 
 1. Review 2 borderline images flagged in Session 8 (owner confirmation needed)
 2. Integrate Instagram Graph API for live feed on public site
@@ -232,6 +245,7 @@
 8. Add E2E tests for login flow, booking flow, intake form
 9. Add more unit tests for API routes and auth helpers
 10. Convert barber photos to avif for performance optimization
+11. Configure Resend for production email delivery (intake emails, booking confirmations)
 
 ## Decisions Made
 
@@ -272,3 +286,4 @@
 | 6       | 2026-03-08 | Google Maps address links. Mandatory email/phone on booking + intake. Booking sidebar logo fix. Service card text contrast improvement.                                                                                                                              |
 | 7       | 2026-03-08 | Full-scale audit. 18 issues fixed across security (API auth, HSTS, CSP), bugs (day-of-week, type cast), UX (error boundaries, booking feedback), code quality (try/catch, unused deps, env validation), docs. All quality gates passing.                             |
 | 8       | 2026-03-09 | Premium SEO (JSON-LD, OpenGraph, sitemap, robots, per-page metadata, dynamic barber metadata). AI engine optimization (llms.txt, FAQ JSON-LD). Children's photos removed. Intake form updates (removed hair type, added Fresha referral). All quality gates passing. |
+| 9       | 2026-03-09 | Fixed Sunday schedule bug on barber profiles. VPS production debugging (UntrustedHost, corrupted build). Send Intake button with email/link delivery. Client soft-delete (OWNER only). Intake form pre-fill from query params. All quality gates passing.             |
