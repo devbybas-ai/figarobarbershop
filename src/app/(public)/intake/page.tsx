@@ -64,6 +64,15 @@ export default function IntakePage() {
     }
   }
 
+  // Kiosk mode: auto-reset after 8 seconds so iPad is ready for next walk-in
+  useEffect(() => {
+    if (!submitted) return;
+    const timer = setTimeout(() => {
+      setSubmitted(false);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [submitted]);
+
   if (submitted) {
     return (
       <section className="flex min-h-[70vh] items-center justify-center bg-figaro-cream">
@@ -87,6 +96,7 @@ export default function IntakePage() {
           <p className="mt-2 text-figaro-black/60">
             Your intake form has been submitted. We&apos;re ready to take care of you.
           </p>
+          <p className="mt-4 text-sm text-figaro-black/30">This screen will reset shortly.</p>
         </motion.div>
       </section>
     );
@@ -242,6 +252,37 @@ export default function IntakePage() {
           >
             {submitting ? "Submitting..." : "Submit Intake Form"}
           </button>
+
+          <p className="mt-4 text-center text-xs leading-relaxed text-figaro-black/40">
+            By submitting this form, you agree to our{" "}
+            <a
+              href="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-figaro-black/60"
+            >
+              Terms of Service
+            </a>
+            ,{" "}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-figaro-black/60"
+            >
+              Privacy Policy
+            </a>
+            , and{" "}
+            <a
+              href="/cancellation-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-figaro-black/60"
+            >
+              Cancellation Policy
+            </a>
+            .
+          </p>
         </form>
       </div>
     </section>

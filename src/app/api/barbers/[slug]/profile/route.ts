@@ -4,6 +4,14 @@ import { auth } from "@/lib/auth";
 import { hasRole } from "@/lib/auth-utils";
 
 const BARBER_EDITABLE_FIELDS = ["bio", "phone", "imageUrl", "instagram", "facebook", "tiktok"];
+const OWNER_EXTRA_FIELDS = [
+  "firstName",
+  "lastName",
+  "commissionRate",
+  "title",
+  "tagline",
+  "specialties",
+];
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const session = await auth();
@@ -31,12 +39,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 
   const body = await req.json();
 
+  const allowedFields = isOwner
+    ? [...BARBER_EDITABLE_FIELDS, ...OWNER_EXTRA_FIELDS]
+    : BARBER_EDITABLE_FIELDS;
+
   // Only allow known editable fields
-  const updates: Record<string, string | null> = {};
-  for (const field of BARBER_EDITABLE_FIELDS) {
+  const updates: Record<string, string | number | string[] | null> = {};
+  for (const field of allowedFields) {
     if (field in body) {
       const value = body[field];
-      if (value === null || value === "" || typeof value === "string") {
+      if (field === "commissionRate") {
+        const num = Number(value);
+        if (!isNaN(num) && num >= 0 && num <= 100) {
+          updates[field] = num;
+        }
+      } else if (field === "specialties") {
+        if (Array.isArray(value) && value.every((v: unknown) => typeof v === "string")) {
+          updates[field] = value as string[];
+        }
+      } else if (value === null || value === "" || typeof value === "string") {
         updates[field] = value === "" ? null : value;
       }
     }
@@ -46,10 +67,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
   }
 
+  // If firstName changes, also update the linked User.name
+  const nameChanged = "firstName" in updates || "lastName" in updates;
+  const newFirstName = (updates.firstName as string) ?? barber.firstName;
+  const newLastName = (updates.lastName as string) ?? barber.lastName;
+
   const updated = await db.barber.update({
     where: { id: barber.id },
     data: updates,
   });
+
+  if (nameChanged && barber.user?.id) {
+    await db.user.update({
+      where: { id: barber.user.id },
+      data: { name: `${newFirstName} ${newLastName}` },
+    });
+  }
 
   return NextResponse.json(updated);
 }

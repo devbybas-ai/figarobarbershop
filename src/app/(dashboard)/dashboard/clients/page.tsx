@@ -159,7 +159,10 @@ export default function ClientsPage() {
           <tbody className="divide-y divide-figaro-gold/5">
             {clients.length === 0 ? (
               <tr>
-                <td colSpan={isOwner ? 6 : 5} className="px-4 py-8 text-center text-figaro-cream/40">
+                <td
+                  colSpan={isOwner ? 6 : 5}
+                  className="px-4 py-8 text-center text-figaro-cream/40"
+                >
                   No clients found
                 </td>
               </tr>

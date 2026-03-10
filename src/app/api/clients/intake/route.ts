@@ -34,10 +34,13 @@ export async function POST(request: NextRequest) {
       client = await db.client.update({
         where: { id: client.id },
         data: {
+          firstName: data.firstName,
+          lastName: data.lastName,
           phone: data.phone ?? client.phone,
           intakeCompleted: true,
           intakeData,
           notes: data.notes,
+          deletedAt: null, // Restore if previously soft-deleted
         },
       });
     } else {
