@@ -117,8 +117,25 @@ const PORTFOLIO_MAP: Record<string, string[]> = {
   ],
 };
 
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const DAY_ABBREVIATIONS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// DB convention: 1=Monday, 2=Tuesday, ..., 7=Sunday
+const DAY_NAMES: Record<number, string> = {
+  1: "Monday",
+  2: "Tuesday",
+  3: "Wednesday",
+  4: "Thursday",
+  5: "Friday",
+  6: "Saturday",
+  7: "Sunday",
+};
+const DAY_ABBREVIATIONS: Record<number, string> = {
+  1: "Mon",
+  2: "Tue",
+  3: "Wed",
+  4: "Thu",
+  5: "Fri",
+  6: "Sat",
+  7: "Sun",
+};
 
 function formatTime(time: string): string {
   const parts = time.split(":").map(Number);
