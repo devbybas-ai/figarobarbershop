@@ -1,7 +1,7 @@
 # Figaro Command Center - Session Handoff
 
-> Last updated: 2026-03-08
-> Session: 7 (complete)
+> Last updated: 2026-03-09
+> Session: 8 (in progress)
 
 ## Current State
 
@@ -178,21 +178,60 @@
 - **Reverted** Header "View Services" link change (was intentionally non-clickable as visual CTA hint)
 - All quality gates passing: type-check (0), lint (0), format (clean), test (6/6), build (32 routes, 0 errors)
 
+### Done (Session 8)
+
+- **Header UI polish**:
+  - "View Services" text animated with `bounce-x` CSS animation
+  - CTA button text changed from "Book Appointment" to "Services"
+- **Barber profile background tuning**:
+  - Per-barber `HERO_BG_POSITION` map for independent background positioning
+  - Bryam's hero background set to "center 60%" (others default "center 25%")
+- **Homepage CTA overlay reduced**: Teal overlay opacity from /90 to /65 for more background visibility
+- **Children's photos removed from site** (policy: no minors):
+  - 5 confirmed images removed from `PORTFOLIO_MAP`, `HERO_BACKGROUNDS`, and barbers listing gallery
+  - Johnny's hero background replaced with adult portfolio image
+  - 2 borderline images flagged for owner review
+- **Premium SEO implementation**:
+  - Centralized SEO config (`src/lib/seo.ts`) with business data, geo, keywords, hours
+  - 6 JSON-LD schema components: BarberShop, Services, Person, WebSite, Breadcrumbs, FAQ
+  - Dynamic `sitemap.ts` with all static + dynamic barber pages
+  - `robots.ts` blocking /api/, /login, /dashboard/ from crawlers
+  - `manifest.webmanifest` for PWA readiness
+  - Enhanced root layout: OpenGraph, Twitter Cards, metadataBase, robots directives, 30+ keywords
+  - Homepage refactored: server component with metadata + client `HomeContent` component
+  - Per-page metadata on all public pages (homepage, services, barbers, contact, book, intake, login)
+  - Dynamic `generateMetadata` for barber profile pages (unique title/description/OG per barber)
+  - Breadcrumb JSON-LD on services, barbers, and individual barber pages
+  - Service JSON-LD with pricing on services page
+  - FAQ JSON-LD (10 questions) on homepage for AI engine rich snippets
+  - Book/intake/login pages: metadata via route-level layouts (pages are "use client")
+  - Login and intake pages set to `noindex`
+- **AI Engine Optimization (AEO)**:
+  - `llms.txt` — concise business summary for AI crawlers
+  - `llms-full.txt` — comprehensive reference with barber bios, services, FAQ, areas served
+  - FAQ JSON-LD feeds direct answers to AI assistants
+- **Intake form updates**:
+  - Removed "Hair Type" field (form + API Zod schema)
+  - Added "Fresha" to referral options
+  - "Walked by" changed to "Walked / Drove By"
+- All quality gates passing: type-check (0), lint (0), format (clean), test (6/6), build (32 routes + sitemap.xml + robots.txt)
+
 ### Blockers
 
 - None
 
-### Next Steps (Session 8)
+### Next Steps (Session 9)
 
-1. Integrate Instagram Graph API for live feed on public site
-2. Integrate Stripe Connect for real payments
-3. Build analytics dashboard with real Recharts data (currently sample data — TD-004)
-4. Refactor book/page.tsx into step components (845 lines — TD-005)
-5. Move barber profile hardcoded data maps into DB fields (TD-006)
-6. Add rate limiting on login and public form endpoints (TD-008)
-7. Add E2E tests for login flow, booking flow, intake form
-8. Add more unit tests for API routes and auth helpers
-9. Convert barber photos to avif for performance optimization
+1. Review 2 borderline images flagged in Session 8 (owner confirmation needed)
+2. Integrate Instagram Graph API for live feed on public site
+3. Integrate Stripe Connect for real payments (pending owner decision on Fresha vs custom)
+4. Build analytics dashboard with real Recharts data (currently sample data — TD-004)
+5. Refactor book/page.tsx into step components (845 lines — TD-005)
+6. Move barber profile hardcoded data maps into DB fields (TD-006)
+7. Add rate limiting on login and public form endpoints (TD-008)
+8. Add E2E tests for login flow, booking flow, intake form
+9. Add more unit tests for API routes and auth helpers
+10. Convert barber photos to avif for performance optimization
 
 ## Decisions Made
 
@@ -216,16 +255,20 @@
 - Availability engine uses 30-minute slot increments
 - Shop photos only on dark hero/atmosphere sections, cream body sections stay clean
 - Barber last names left empty (not "Figaro") -- only first names displayed
+- `llms.txt` / `llms-full.txt` for AI engine optimization (ChatGPT, Perplexity, Google AI Overviews)
+- Server component pattern for SEO: extract "use client" content to components, use route-level layouts for metadata on client pages
+- FAQ data centralized in `src/lib/faq.ts` for reuse across JSON-LD and future FAQ page
 
 ## Session Log
 
-| Session | Date       | Summary                                                                                                                                                                                                                                                 |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1       | 2026-03-06 | Full project setup. Tech stack approved and locked. All scaffolding, security, testing, governance, and quality gates complete.                                                                                                                         |
-| 2       | 2026-03-06 | Public site redesign complete. Barber-centric design with teal/gold palette, real photos for all 6 barbers, real service data, customer testimonials, gallery integration. Seed data updated with real Figaro business data. All quality gates passing. |
-| 3       | 2026-03-06 | Database connected and seeded. Auth.js v5 with bcrypt + role-based access. Dashboard wired to live data. Booking availability engine built. Intake form updated with real barbers. All quality gates passing.                                           |
-| 4       | 2026-03-06 | Real shop photos integrated across site. Homepage streamlined (removed mosaic + gallery strip). Hero buttons swapped. "Command Center" -> "Barbershop Administration". Barber fake last names removed from DB + seed.                                   |
-| 4b      | 2026-03-08 | Continued homepage polish: removed services section, smoothed scroll animations, tested logo placement. Ready for VPS deployment.                                                                                                                       |
-| 5       | 2026-03-08 | VPS deployed. Booking UX overhaul (mobile cart, date picker, scroll-to-top). Availability API fixed. Header nav cleanup. Contact CTAs. Barber profile hero backgrounds. Mobile homepage improvements.                                                   |
-| 6       | 2026-03-08 | Google Maps address links. Mandatory email/phone on booking + intake. Booking sidebar logo fix. Service card text contrast improvement.                                                                                                                 |
-| 7       | 2026-03-08 | Full-scale audit. 18 issues fixed across security (API auth, HSTS, CSP), bugs (day-of-week, type cast), UX (error boundaries, booking feedback), code quality (try/catch, unused deps, env validation), docs. All quality gates passing.               |
+| Session | Date       | Summary                                                                                                                                                                                                                                                              |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1       | 2026-03-06 | Full project setup. Tech stack approved and locked. All scaffolding, security, testing, governance, and quality gates complete.                                                                                                                                      |
+| 2       | 2026-03-06 | Public site redesign complete. Barber-centric design with teal/gold palette, real photos for all 6 barbers, real service data, customer testimonials, gallery integration. Seed data updated with real Figaro business data. All quality gates passing.              |
+| 3       | 2026-03-06 | Database connected and seeded. Auth.js v5 with bcrypt + role-based access. Dashboard wired to live data. Booking availability engine built. Intake form updated with real barbers. All quality gates passing.                                                        |
+| 4       | 2026-03-06 | Real shop photos integrated across site. Homepage streamlined (removed mosaic + gallery strip). Hero buttons swapped. "Command Center" -> "Barbershop Administration". Barber fake last names removed from DB + seed.                                                |
+| 4b      | 2026-03-08 | Continued homepage polish: removed services section, smoothed scroll animations, tested logo placement. Ready for VPS deployment.                                                                                                                                    |
+| 5       | 2026-03-08 | VPS deployed. Booking UX overhaul (mobile cart, date picker, scroll-to-top). Availability API fixed. Header nav cleanup. Contact CTAs. Barber profile hero backgrounds. Mobile homepage improvements.                                                                |
+| 6       | 2026-03-08 | Google Maps address links. Mandatory email/phone on booking + intake. Booking sidebar logo fix. Service card text contrast improvement.                                                                                                                              |
+| 7       | 2026-03-08 | Full-scale audit. 18 issues fixed across security (API auth, HSTS, CSP), bugs (day-of-week, type cast), UX (error boundaries, booking feedback), code quality (try/catch, unused deps, env validation), docs. All quality gates passing.                             |
+| 8       | 2026-03-09 | Premium SEO (JSON-LD, OpenGraph, sitemap, robots, per-page metadata, dynamic barber metadata). AI engine optimization (llms.txt, FAQ JSON-LD). Children's photos removed. Intake form updates (removed hair type, added Fresha referral). All quality gates passing. |

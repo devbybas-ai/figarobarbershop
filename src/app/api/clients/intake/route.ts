@@ -9,7 +9,6 @@ const intakeSchema = z.object({
   email: z.email(),
   phone: z.string().min(1),
   preferredBarber: z.string().optional(),
-  hairType: z.string().optional(),
   allergies: z.string().optional(),
   referral: z.string().optional(),
   notes: z.string().optional(),
@@ -27,7 +26,6 @@ export async function POST(request: NextRequest) {
 
     const intakeData = {
       preferredBarber: data.preferredBarber,
-      hairType: data.hairType,
       allergies: data.allergies,
       referral: data.referral,
     };

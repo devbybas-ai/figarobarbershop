@@ -1,10 +1,20 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "Contact & Location — 114 Leucadia Blvd, Encinitas, CA",
   description:
-    "Get in touch with Figaro Barbershop Leucadia. Located at 114 Leucadia Blvd in Encinitas, CA.",
+    "Visit Figaro Barbershop at 114 Leucadia Blvd, Encinitas, CA 92024. Call (760) 751-2008. Open Monday–Saturday. Walk-ins welcome. Directions, hours, and contact info.",
+  alternates: {
+    canonical: `${SITE_URL}/contact`,
+  },
+  openGraph: {
+    title: "Contact & Location | Figaro Barbershop Leucadia",
+    description:
+      "114 Leucadia Blvd, Encinitas, CA 92024. Call (760) 751-2008. Walk-ins welcome. Get directions and hours.",
+    url: `${SITE_URL}/contact`,
+  },
 };
 
 export default function ContactPage() {

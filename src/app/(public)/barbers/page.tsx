@@ -1,10 +1,22 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import type { Metadata } from "next";
+import { BreadcrumbJsonLd } from "@/components/seo/JsonLd";
+import { SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Our Barbers",
-  description: "Meet the master barbers at Figaro Barbershop Leucadia.",
+  title: "Meet Our Barbers — Master Barbers in Leucadia, Encinitas",
+  description:
+    "Meet the crew at Figaro Barbershop Leucadia. 6 skilled barbers specializing in fades, classic cuts, beard work, and creative styles. Book your favorite barber in Encinitas, CA.",
+  alternates: {
+    canonical: `${SITE_URL}/barbers`,
+  },
+  openGraph: {
+    title: "Meet Our Barbers | Figaro Barbershop Leucadia",
+    description:
+      "6 skilled barbers specializing in fades, classic cuts, beard work, and creative styles. Find your barber in Leucadia, Encinitas.",
+    url: `${SITE_URL}/barbers`,
+  },
 };
 
 const BARBER_IMAGES: Record<string, string> = {
@@ -24,7 +36,6 @@ const PORTFOLIO_IMAGES = [
   "/images/gallery/b8ee786a-35ef-42bb-aaec-7024eed7ff0d.avif",
   "/images/gallery/d9e95b66-89d7-4a84-9bd3-ff318523a309.avif",
   "/images/gallery/4c9c44b6-29da-46b3-a958-83e43eaf94e6.avif",
-  "/images/gallery/8b48bb2a-0289-49e8-85f7-2aebefabf530.avif",
 ];
 
 export default async function BarbersPage() {
@@ -35,6 +46,12 @@ export default async function BarbersPage() {
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Our Barbers", href: "/barbers" },
+        ]}
+      />
       {/* Hero Banner */}
       <section className="relative flex h-64 items-center justify-center overflow-hidden bg-figaro-dark sm:h-80">
         <img

@@ -63,9 +63,13 @@ const HERO_BACKGROUNDS: Record<string, string> = {
   ricardo: "/images/gallery/0f0eafba-ce21-40b2-9249-3267e20a9258.avif",
   zeke: "/images/gallery/b8ee786a-35ef-42bb-aaec-7024eed7ff0d.avif",
   bryam: "/images/gallery/c2416687-39d6-452d-bb63-f36b13392fb6.avif",
-  johnny: "/images/gallery/0bc39962-fbe1-4e8f-b0d6-39d9e2068115.avif",
+  johnny: "/images/gallery/147500a7-f1d7-49f8-8f06-8364382d0e30.avif",
   david: "/images/gallery/7ac62a21-d603-44af-b2c9-2efb751c2b7e.avif",
   austin: "/images/gallery/73245090-d1c9-498f-b124-21345a191ea9.avif",
+};
+
+const HERO_BG_POSITION: Record<string, string> = {
+  bryam: "center 60%",
 };
 
 const PORTFOLIO_MAP: Record<string, string[]> = {
@@ -81,20 +85,15 @@ const PORTFOLIO_MAP: Record<string, string[]> = {
     "/images/gallery/b8ee786a-35ef-42bb-aaec-7024eed7ff0d.avif",
     "/images/gallery/d9e95b66-89d7-4a84-9bd3-ff318523a309.avif",
     "/images/gallery/4c9c44b6-29da-46b3-a958-83e43eaf94e6.avif",
-    "/images/gallery/8b48bb2a-0289-49e8-85f7-2aebefabf530.avif",
     "/images/gallery/307bda86-2dd4-4888-84cf-672f51fba19a.avif",
     "/images/gallery/f215f0ff-3f65-4785-95f0-8384c4213df5.avif",
   ],
   bryam: [
     "/images/gallery/c2416687-39d6-452d-bb63-f36b13392fb6.avif",
-    "/images/gallery/c5164419-a050-4bb7-b421-e16b0a4f3f4c.avif",
-    "/images/gallery/d1c7e521-9fd7-420c-ad34-b3d4dbf89b0c.avif",
     "/images/gallery/e0c8f9fd-7805-49ae-b8f3-56b1f632eae4.avif",
     "/images/gallery/fefb8471-935f-4463-a126-d88aefbb2066.avif",
-    "/images/gallery/23e5d9f2-0b56-48bf-9e1c-c2f8f2379bce.avif",
   ],
   johnny: [
-    "/images/gallery/0bc39962-fbe1-4e8f-b0d6-39d9e2068115.avif",
     "/images/gallery/147500a7-f1d7-49f8-8f06-8364382d0e30.avif",
     "/images/gallery/1e0e2728-5887-4fac-8103-2a81de962a44.avif",
     "/images/gallery/2912f516-107b-44d7-8cbc-99cef0058e50.avif",
@@ -115,7 +114,6 @@ const PORTFOLIO_MAP: Record<string, string[]> = {
     "/images/gallery/b8ee786a-35ef-42bb-aaec-7024eed7ff0d.avif",
     "/images/gallery/d9e95b66-89d7-4a84-9bd3-ff318523a309.avif",
     "/images/gallery/4c9c44b6-29da-46b3-a958-83e43eaf94e6.avif",
-    "/images/gallery/8b48bb2a-0289-49e8-85f7-2aebefabf530.avif",
   ],
 };
 
@@ -178,6 +176,7 @@ export default function BarberProfilePage({ params }: { params: Promise<{ slug: 
   const specialties = BARBER_SPECIALTIES[slugLower] ?? [];
   const tagline = BARBER_TAGLINES[slugLower] ?? "";
   const heroBg = HERO_BACKGROUNDS[slugLower];
+  const heroBgPosition = HERO_BG_POSITION[slugLower] ?? "center 25%";
   const portfolio = PORTFOLIO_MAP[slugLower] ?? [];
 
   const workingDays = barber.schedules
@@ -198,7 +197,8 @@ export default function BarberProfilePage({ params }: { params: Promise<{ slug: 
             <img
               src={heroBg}
               alt=""
-              className="h-full w-full object-cover object-[center_25%] opacity-30"
+              className="h-full w-full object-cover opacity-30"
+              style={{ objectPosition: heroBgPosition }}
               aria-hidden="true"
             />
           </div>

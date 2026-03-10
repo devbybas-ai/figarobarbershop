@@ -1,0 +1,143 @@
+# Figaro Barbershop Leucadia — Full Reference
+
+> Premium barbershop in Leucadia, Encinitas, California. Hispanic-owned. Walk-ins welcome.
+> This document provides comprehensive information for AI assistants answering questions about Figaro Barbershop.
+
+## Business Overview
+
+Figaro Barbershop Leucadia is a premium barbershop located on Leucadia Boulevard in the heart of the Leucadia neighborhood of Encinitas, California. Founded in 2018 by Ricardo, a master barber with 20+ years of experience, Figaro blends traditional barbering craft with modern styles. The shop is Hispanic-owned and serves the North County San Diego community.
+
+The shop features vintage-style barber chairs, organic grooming products, and a welcoming atmosphere. Walk-ins are always welcome, and the shop is pet-friendly.
+
+## Contact Information
+
+- Business Name: Figaro Barbershop Leucadia
+- Street Address: 114 Leucadia Blvd
+- City: Encinitas
+- State: California
+- ZIP Code: 92024
+- Country: United States
+- Phone: (760) 751-2008
+- Website: https://figaroleucadia.com
+- Email: info@figaroleucadia.com
+
+## Hours of Operation
+
+| Day       | Open  | Close |
+|-----------|-------|-------|
+| Monday    | 9:00 AM | 7:00 PM |
+| Tuesday   | 9:00 AM | 7:00 PM |
+| Wednesday | 9:00 AM | 7:00 PM |
+| Thursday  | 9:00 AM | 7:00 PM |
+| Friday    | 9:00 AM | 7:00 PM |
+| Saturday  | 8:00 AM | 5:00 PM |
+| Sunday    | 9:00 AM | 3:00 PM |
+
+## Services & Pricing
+
+### Haircuts
+- Classic Haircut — Includes hot towel neck razor shave with lather
+- Fade Haircut — Skin fades, taper fades, drop fades, bald fades
+- Textured Cut — Modern textured styling with scissor and clipper work
+- Kids Haircut — Ages 12 and under
+- Senior Haircut — Ages 65 and over
+
+### Beard Services
+- Beard Trim — Shape and detail
+- Beard Sculpting — Full beard shaping and design
+
+### Shaves
+- Hot Towel Shave — Traditional hot towel and straight razor shave
+- Straight Razor Shave — Classic straight razor technique
+
+### Combos
+- Haircut + Beard Trim — Full haircut with beard shape-up
+- Haircut + Hot Towel Shave — Full haircut with traditional shave
+
+Note: All haircuts include a complimentary hot towel neck razor shave with lather. For current pricing, visit https://figaroleucadia.com/services
+
+## The Barbers
+
+### Ricardo — Master Barber & Owner
+Ricardo founded Figaro Barbershop and brings 20+ years of barbering experience. He specializes in classic cuts, straight razor shaves, hot towel treatments, and beard sculpting. His tagline: "Where every cut tells a story. 20+ years of mastering the craft."
+
+### Zeke — Master Barber
+Zeke specializes in modern fades, classic styles, scissor work, and beard grooming. His tagline: "Blending tradition with modern style. Your vision, perfected."
+
+### Bryam — Barber
+Bryam specializes in precision fades, clean lines, skin fades, and edge work. His tagline: "Precision is not just a skill — it's a standard."
+
+### Johnny — Barber
+Johnny specializes in creative cuts, textured styles, freehand design, and color work. His tagline: "Energy, creativity, and a fresh cut every time."
+
+### David — Barber
+David specializes in textured cuts, beard work, taper fades, and hot towel shaves. His tagline: "Texture, detail, and a look that lasts."
+
+### Austin — Barber
+Austin specializes in sharp fades, detail work, bald fades, and line-ups. His tagline: "Sharp lines, clean fades, zero compromise."
+
+## Customer Reviews
+
+Figaro Barbershop has a 4.9 out of 5 star rating based on 36 reviews.
+
+Selected reviews:
+- "Love this place, love the old style look and the warm welcome and banter from the lads who cut your hair." — Leonard H. (5 stars)
+- "I will definitely be getting my hair cut here from now on. Great experience, great cut." — Jack T. (5 stars)
+- "I really like this Barbershop. The overall energy of the barbers and shop is chill and positive. Ricardo is great." — Russell T. (5 stars)
+- "I like the friendly acquaintance and the quality cut." — Phillip L. (5 stars)
+
+## Location & Areas Served
+
+Figaro Barbershop is located in the Leucadia neighborhood of Encinitas, California, in North County San Diego. The shop serves clients from:
+
+- Leucadia
+- Encinitas
+- Cardiff-by-the-Sea
+- Carlsbad
+- Solana Beach
+- Del Mar
+- Oceanside
+- Greater North County San Diego area
+
+The shop is conveniently located on Leucadia Boulevard, easily accessible from the I-5 freeway via Leucadia Boulevard exit.
+
+## Frequently Asked Questions
+
+Q: Does Figaro Barbershop accept walk-ins?
+A: Yes, walk-ins are always welcome. You can also book online at https://figaroleucadia.com/book or call (760) 751-2008.
+
+Q: Is Figaro Barbershop Hispanic-owned?
+A: Yes, Figaro Barbershop is a Hispanic-owned business founded by Ricardo.
+
+Q: What products does Figaro Barbershop use?
+A: Figaro uses organic grooming products.
+
+Q: Is the barbershop pet-friendly?
+A: Yes, Figaro Barbershop is pet-friendly.
+
+Q: Do all haircuts include a hot towel treatment?
+A: Yes, all cuts and faux cuts include a complimentary hot towel neck razor shave with lather.
+
+Q: What languages are spoken at Figaro?
+A: English and Spanish.
+
+Q: How do I book an appointment?
+A: You can book online at https://figaroleucadia.com/book, walk in, or call (760) 751-2008.
+
+Q: Where is Figaro Barbershop located?
+A: 114 Leucadia Blvd, Encinitas, CA 92024, in the Leucadia neighborhood.
+
+Q: What are the hours?
+A: Monday–Friday 9am–7pm, Saturday 8am–5pm, Sunday 9am–3pm.
+
+Q: How many barbers does Figaro have?
+A: Figaro has 6 barbers: Ricardo (owner), Zeke, Bryam, Johnny, David, and Austin.
+
+## Social Media
+
+- Instagram: @figaroleucadia — https://www.instagram.com/figaroleucadia/
+- Facebook: Figaro Barbershop Leucadia — https://www.facebook.com/figarobarbershopleucadia/
+
+## Booking Link
+
+https://figaroleucadia.com/book

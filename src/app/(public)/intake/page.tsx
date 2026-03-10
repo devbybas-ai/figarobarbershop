@@ -34,7 +34,6 @@ export default function IntakePage() {
       email: form.get("email") as string,
       phone: form.get("phone") as string,
       preferredBarber: (form.get("preferredBarber") as string) || undefined,
-      hairType: (form.get("hairType") as string) || undefined,
       allergies: (form.get("allergies") as string) || undefined,
       referral: (form.get("referral") as string) || undefined,
       notes: (form.get("notes") as string) || undefined,
@@ -164,23 +163,6 @@ export default function IntakePage() {
           </div>
 
           <div>
-            <label htmlFor="hairType" className="block text-sm font-medium text-figaro-black">
-              Hair Type
-            </label>
-            <select
-              id="hairType"
-              name="hairType"
-              className="mt-1 block w-full rounded-sm border border-figaro-black/20 bg-white px-3 py-2.5 text-figaro-black focus:border-figaro-gold focus:outline-none focus:ring-1 focus:ring-figaro-gold"
-            >
-              <option value="">Select</option>
-              <option value="straight">Straight</option>
-              <option value="wavy">Wavy</option>
-              <option value="curly">Curly</option>
-              <option value="coily">Coily</option>
-            </select>
-          </div>
-
-          <div>
             <label
               htmlFor="preferredBarber"
               className="block text-sm font-medium text-figaro-black"
@@ -226,8 +208,9 @@ export default function IntakePage() {
               <option value="">Select</option>
               <option value="instagram">Instagram</option>
               <option value="google">Google</option>
+              <option value="fresha">Fresha</option>
               <option value="friend">Friend / Family</option>
-              <option value="walk-by">Walked by</option>
+              <option value="walk-drive-by">Walked / Drove By</option>
               <option value="other">Other</option>
             </select>
           </div>

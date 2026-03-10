@@ -2,10 +2,22 @@ import { db } from "@/lib/db";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { ServicesJsonLd, BreadcrumbJsonLd } from "@/components/seo/JsonLd";
+import { SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Services",
-  description: "Browse our full menu of barbershop services at Figaro Barbershop Leucadia.",
+  title: "Haircuts, Fades, Beard Trims & Shaves — Services & Prices",
+  description:
+    "Full service menu at Figaro Barbershop Leucadia. Haircuts, skin fades, taper fades, beard trims, hot towel shaves, straight razor shaves. All cuts include hot towel neck razor shave with lather. View prices.",
+  alternates: {
+    canonical: `${SITE_URL}/services`,
+  },
+  openGraph: {
+    title: "Services & Prices | Figaro Barbershop Leucadia",
+    description:
+      "Haircuts, fades, beard trims, hot towel shaves — all cuts include hot towel neck razor shave. View our full menu and prices.",
+    url: `${SITE_URL}/services`,
+  },
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -34,6 +46,20 @@ export default async function ServicesPage() {
 
   return (
     <>
+      <ServicesJsonLd
+        services={services.map((s) => ({
+          name: s.name,
+          description: s.description,
+          price: Number(s.price),
+          duration: s.durationMinutes,
+        }))}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Services", href: "/services" },
+        ]}
+      />
       {/* Hero Banner */}
       <section className="relative flex h-64 items-center justify-center overflow-hidden bg-figaro-dark sm:h-80">
         <img

@@ -3,8 +3,6 @@
 > **The Dev Studio Bible — Setup, Standards, Health & Audit Framework**
 > Version 3.0 | Created: 2026-03-06
 > Author: Bas Rosario
-> Derived from: OrcaChild, BuiltByBas, Colour Parlor, KAR
-> This is the single source of truth for all projects.
 
 ---
 
@@ -58,8 +56,8 @@ Based on the answers from Step 1, recommend a complete tech stack. For each choi
 - **Language** (e.g., TypeScript, Python, Go, Rust)
 - **Framework** (e.g., Next.js, Django, Express, SvelteKit, Astro, Flask)
 - **Styling** (e.g., Tailwind CSS, CSS Modules, styled-components, vanilla CSS)
-- **Database** (e.g., PostgreSQL via Supabase, SQLite, MongoDB, none)
-- **Authentication** (e.g., Supabase Auth, NextAuth, Clerk, custom, none)
+- **Database** (e.g., PostgreSQL self-hosted, SQLite, MongoDB, none -- PostgreSQL is the default for all web apps)
+- **Authentication** (e.g., Auth.js/NextAuth, Clerk, custom, none)
 - **Testing** (e.g., Vitest, Jest, Pytest, Playwright)
 - **Package manager** (e.g., pnpm, npm, yarn, pip, cargo)
 - **Linting & formatting** (e.g., ESLint + Prettier, Ruff, Clippy)
@@ -180,9 +178,613 @@ Once approved, the AI should:
 
 ---
 
-## Step 6: Project Ready
+## Step 6: Infrastructure Foundation
 
-Once setup is complete, display:
+After the codebase is scaffolded (Step 5), set up the foundational infrastructure. These guides are reusable across projects and must be completed before feature development begins. Each section follows the Eight Pillars.
+
+> **Note:** Steps 6a-6d run in local dev. VPS deployment (Step 6c NGINX) happens later when the site is ready to show the client. Complete 6a, 6b, and 6d locally first.
+
+---
+
+### Step 6a: GitHub Setup
+
+> Pillar alignment: Structure (backup + collaboration), Security (access control), R3S (recovery from any failure)
+
+GitHub is the single source of truth for code and the primary backup/recovery mechanism.
+
+**Initial repository setup:**
+
+```bash
+# Initialize git (if not already done by framework scaffold)
+git init
+
+# Create .gitignore (framework-specific -- never commit secrets, deps, or build output)
+# Verify these are present:
+#   .env, .env.local, .env.*.local
+#   node_modules/, .next/, /build, /out
+#   /coverage, /test-results, /playwright-report
+#   *.pem, .DS_Store, Thumbs.db
+
+# Initial commit
+git add .
+git commit -m "chore: initial project scaffold
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+**Create GitHub repository:**
+
+```bash
+# Create private repo (default -- public only for open-source)
+gh repo create [org-or-user]/[project-name] --private --source=. --push
+
+# Verify remote
+git remote -v
+```
+
+**Branch protection (configure via GitHub UI or CLI):**
+
+| Setting                   | Value                               |
+| ------------------------- | ----------------------------------- |
+| Default branch            | `main`                              |
+| Require PR for merge      | Recommended for team projects       |
+| Require status checks     | Enable once CI is configured        |
+| Force push protection     | Enabled -- never force-push to main |
+| Delete branch after merge | Enabled                             |
+
+**Backup strategy:**
+
+- Every commit to `main` is automatically backed up on GitHub
+- Local + remote = 2 copies minimum at all times
+- For VPS: the deployed server is a 3rd copy (`git pull` on deploy)
+- Catastrophic recovery: clone from GitHub, restore `.env`, push schema, seed DB
+
+**Commit conventions (enforced every session):**
+
+```
+Format: <type>: <description>
+Types:  feat, fix, docs, style, refactor, test, build, chore
+Footer: Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**GitHub Actions CI (add when ready):**
+
+Create `.github/workflows/ci.yml` to run quality gates on every push:
+
+```yaml
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm type-check
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm test
+      - run: pnpm build
+```
+
+---
+
+### Step 6b: PostgreSQL / Database Setup
+
+> Pillar alignment: Security (isolated user, strong password), Structure (schema-first), R3S (backup + recovery), Performance (indexed queries)
+
+PostgreSQL is the default database for all web applications. Self-hosted on the same machine during development, self-hosted on VPS in production.
+
+**Prerequisites:**
+
+- PostgreSQL installed (v15+ recommended, v17 preferred)
+- `psql` accessible from terminal
+- Prisma (or chosen ORM) in the project
+
+**Create database and user:**
+
+```sql
+-- Connect as postgres superuser
+-- Windows: use pgAdmin or psql from PostgreSQL bin directory
+-- Linux/Mac: sudo -u postgres psql
+
+-- Create a dedicated user (NEVER use the postgres superuser for the app)
+CREATE USER [project]_user WITH PASSWORD '[strong-random-password]';
+
+-- Create the database owned by that user
+CREATE DATABASE [project] OWNER [project]_user;
+
+-- Grant privileges
+GRANT ALL PRIVILEGES ON DATABASE [project] TO [project]_user;
+
+-- Verify
+\l    -- list databases
+\du   -- list users
+```
+
+**Security rules:**
+
+| Rule                               | Standard                                           |
+| ---------------------------------- | -------------------------------------------------- |
+| **Dedicated user per project**     | Never share DB users across projects               |
+| **Strong password**                | 20+ characters, random, stored only in `.env`      |
+| **No superuser for apps**          | App user has access to its own database only       |
+| **Connection string in .env only** | Never hardcode, never commit                       |
+| **Local connections only (dev)**   | PostgreSQL listens on localhost during development |
+| **SSL required (production)**      | Enable SSL for DB connections on VPS               |
+
+**Configure the connection:**
+
+```bash
+# .env (never committed)
+DATABASE_URL=postgresql://[project]_user:[password]@localhost:5432/[project]
+
+# .env.example (committed -- names only, no real values)
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+```
+
+**Schema management with Prisma:**
+
+```bash
+# Define your schema in prisma/schema.prisma
+# datasource block:
+#   provider = "postgresql"
+#   url      = env("DATABASE_URL")
+
+# Push schema to database (development)
+pnpm db:push
+
+# Generate Prisma client
+pnpm db:generate
+
+# Create seed file (prisma/seed.ts)
+# Seeds must be IDEMPOTENT -- safe to re-run using upserts
+pnpm db:seed
+
+# For production migrations (when schema is stable)
+pnpm db:migrate
+```
+
+**Recommended package.json scripts:**
+
+```json
+"db:generate": "prisma generate",
+"db:push": "prisma db push",
+"db:migrate": "prisma migrate dev",
+"db:studio": "prisma studio",
+"db:seed": "prisma db seed"
+```
+
+**Seed data rules:**
+
+- Seeds must be **idempotent** (use `upsert` or `deleteMany` + `create`)
+- Include realistic sample data for development
+- Hash all passwords (bcrypt 12+ rounds) -- never store plaintext even in seed
+- Include all user roles for testing auth flows
+
+**Backup strategy (production):**
+
+```bash
+# Daily automated backup (add to crontab on VPS)
+pg_dump -U [project]_user -h localhost [project] | gzip > /backups/[project]-$(date +%Y%m%d).sql.gz
+
+# Keep 30 days of backups
+find /backups -name "[project]-*.sql.gz" -mtime +30 -delete
+
+# Restore from backup
+gunzip -c /backups/[project]-20260309.sql.gz | psql -U [project]_user -h localhost [project]
+```
+
+**Verification checklist:**
+
+- [ ] Dedicated database created
+- [ ] Dedicated user created (not superuser)
+- [ ] `.env` has correct `DATABASE_URL`
+- [ ] `.env.example` has placeholder `DATABASE_URL`
+- [ ] `prisma db push` succeeds
+- [ ] `prisma db seed` succeeds and is idempotent
+- [ ] `prisma studio` opens and shows tables
+- [ ] Application connects and queries work
+
+---
+
+### Step 6c: NGINX Setup (VPS Phase)
+
+> Pillar alignment: Security (SSL, headers, rate limiting), Performance (caching, compression), R3S (auto-restart, recovery)
+
+NGINX is the reverse proxy between the internet and the application. This step happens when deploying to VPS -- not during local development.
+
+**Prerequisites:**
+
+- Ubuntu VPS with SSH access (key-based, non-root user)
+- Domain pointing to VPS IP (A record)
+- Node.js + pnpm installed on VPS
+- Application cloned and built on VPS
+
+**Install NGINX:**
+
+```bash
+sudo apt update
+sudo apt install nginx -y
+sudo systemctl enable nginx   # Start on boot
+sudo systemctl start nginx
+```
+
+**Create site configuration:**
+
+```nginx
+# /etc/nginx/sites-available/[project]
+server {
+    listen 80;
+    server_name [domain] www.[domain];
+
+    # Redirect HTTP to HTTPS (after SSL is configured)
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name [domain] www.[domain];
+
+    # SSL certificates (managed by Certbot)
+    ssl_certificate /etc/letsencrypt/live/[domain]/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/[domain]/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    # Hide NGINX version
+    server_tokens off;
+
+    # Security headers (defense in depth -- app also sets these)
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Gzip compression
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml image/svg+xml;
+    gzip_min_length 1000;
+
+    # Reverse proxy to Next.js
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Static asset caching (Next.js _next/static is immutable)
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        expires 365d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Public assets caching
+    location /images/ {
+        proxy_pass http://127.0.0.1:3000;
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+}
+```
+
+**Enable site and test:**
+
+```bash
+# Symlink to sites-enabled
+sudo ln -s /etc/nginx/sites-available/[project] /etc/nginx/sites-enabled/
+
+# Remove default site (optional)
+sudo rm /etc/nginx/sites-enabled/default
+
+# Test configuration
+sudo nginx -t
+
+# Reload
+sudo systemctl reload nginx
+```
+
+**SSL with Let's Encrypt:**
+
+```bash
+# Install Certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# Get certificate (auto-configures NGINX)
+sudo certbot --nginx -d [domain] -d www.[domain]
+
+# Verify auto-renewal
+sudo certbot renew --dry-run
+
+# Certbot auto-renews via systemd timer -- verify it exists
+sudo systemctl list-timers | grep certbot
+```
+
+**Process manager (PM2) -- keeps the app running:**
+
+```bash
+# Install PM2 globally
+npm install -g pm2
+
+# Start the application
+cd /var/www/[project]
+pm2 start npm --name "[project]" -- start
+
+# Save process list (survives reboot)
+pm2 save
+
+# Enable PM2 startup on boot
+pm2 startup systemd
+# Run the command it outputs
+
+# Useful commands
+pm2 status          # Check all processes
+pm2 logs [project]  # View logs
+pm2 restart [project]
+pm2 monit           # Live monitoring
+```
+
+**Deploy command (after initial setup):**
+
+```bash
+cd /var/www/[project] && git pull origin main && pnpm install --frozen-lockfile && pnpm build && pm2 restart [project]
+```
+
+**Firewall (UFW):**
+
+```bash
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh        # Or custom SSH port
+sudo ufw allow 80/tcp     # HTTP (for redirect)
+sudo ufw allow 443/tcp    # HTTPS
+sudo ufw enable
+sudo ufw status
+```
+
+**Fail2ban (intrusion prevention):**
+
+```bash
+sudo apt install fail2ban -y
+sudo systemctl enable fail2ban
+
+# Create local config
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+# Edit: set bantime=3600, findtime=600, maxretry=5
+sudo systemctl restart fail2ban
+```
+
+**What happens on restart (the full chain):**
+
+```
+Server boots
+  → systemd starts PostgreSQL (automatic)
+  → systemd starts NGINX (automatic)
+  → systemd starts PM2 via startup script
+    → PM2 starts the Next.js app on port 3000
+  → NGINX proxies port 443 → port 3000
+  → Site is live. No manual intervention needed.
+```
+
+**NGINX verification checklist:**
+
+- [ ] NGINX installed and enabled on boot
+- [ ] Site config created and symlinked
+- [ ] `nginx -t` passes
+- [ ] SSL certificate installed and auto-renewing
+- [ ] HTTP redirects to HTTPS
+- [ ] PM2 running the app, saved, and set for startup
+- [ ] Firewall allows only SSH, 80, 443
+- [ ] Fail2ban active
+- [ ] Full reboot test: server restarts and site comes back automatically
+- [ ] Version header hidden (`server_tokens off`)
+
+---
+
+### Step 6d: SEO Foundation
+
+> Pillar alignment: Performance (fast discovery), Structure (organized metadata), UX (findability), Security (controlled crawl scope)
+
+SEO is not an afterthought -- it is foundational infrastructure. Set up the skeleton at project start so every page ships with proper metadata from day one.
+
+**Centralized SEO config (`src/lib/seo.ts` or equivalent):**
+
+Create a single source of truth for all SEO data:
+
+```typescript
+// All business/site data in one place
+export const SITE_URL = "https://[domain]";
+
+export const BUSINESS = {
+  name: "[Business Name]",
+  description: "[Primary description for meta tags]",
+  phone: "+1-XXX-XXX-XXXX",
+  email: "[email]",
+  address: { street, city, state, zip, country },
+  geo: { latitude, longitude },
+  hours: [{ days, open, close }],
+  social: { instagram, facebook, ... },
+  rating: { value, count },  // If applicable
+  priceRange: "$$",
+  founded: "[year]",
+  areaServed: ["[area1]", "[area2]", ...],
+};
+
+export const SEO_KEYWORDS = {
+  primary: [...],    // Brand + core terms
+  services: [...],   // Service-specific long-tail
+  local: [...],      // Location-based terms
+};
+```
+
+**Required SEO files (create during setup):**
+
+| File / Route                    | Purpose                              | Priority |
+| ------------------------------- | ------------------------------------ | -------- |
+| `src/lib/seo.ts`                | Centralized business + keyword data  | Setup    |
+| `src/app/layout.tsx`            | Root metadata, OG, Twitter, manifest | Setup    |
+| `src/app/sitemap.ts`            | Dynamic XML sitemap                  | Setup    |
+| `src/app/robots.ts`             | Crawl directives                     | Setup    |
+| `src/components/seo/JsonLd.tsx` | JSON-LD structured data components   | Setup    |
+| `public/manifest.webmanifest`   | PWA manifest with branding           | Setup    |
+| `public/llms.txt`               | AI engine summary (concise)          | Setup    |
+| `public/llms-full.txt`          | AI engine full reference             | Setup    |
+| `src/lib/faq.ts`                | Shared FAQ data for JSON-LD + pages  | Setup    |
+
+**Root layout metadata (minimum):**
+
+Every project must set these in the root `layout.tsx`:
+
+```typescript
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "[Business] | [Primary Keyword]",
+    template: "%s | [Business]",
+  },
+  description: "[keyword-rich description, 150-160 chars]",
+  keywords: getAllKeywords(),
+  authors: [{ name: BUSINESS.name }],
+  creator: BUSINESS.name,
+  publisher: BUSINESS.name,
+  formatDetection: { telephone: true, email: true, address: true },
+  alternates: { canonical: SITE_URL },
+  manifest: "/manifest.webmanifest",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: BUSINESS.name,
+    title: "[title]",
+    description: "[description]",
+    images: [{ url: "/images/og-image.webp", width: 1200, height: 630, alt: "[description]" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "[title]",
+    description: "[description]",
+    images: ["/images/og-image.webp"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
+```
+
+**Per-page metadata rules:**
+
+| Page Type         | Metadata Approach                                                    |
+| ----------------- | -------------------------------------------------------------------- |
+| Server components | Export `metadata` or `generateMetadata` directly from page.tsx       |
+| Client components | Create a `layout.tsx` in the route folder to export metadata         |
+| Dynamic routes    | Use `generateMetadata` with DB lookup for unique titles/descriptions |
+| Private pages     | Set `robots: { index: false, follow: false }`                        |
+
+**JSON-LD structured data (Schema.org):**
+
+Create reusable components for each schema type needed:
+
+| Schema Type       | When to Use                     |
+| ----------------- | ------------------------------- |
+| `LocalBusiness`   | Homepage / root layout          |
+| `WebSite`         | Root layout (enables sitelinks) |
+| `Service`         | Services page                   |
+| `Person`          | Team/staff profile pages        |
+| `FAQPage`         | Any page with FAQ content       |
+| `BreadcrumbList`  | All pages except homepage       |
+| `Product`         | Product/shop pages              |
+| `AggregateRating` | Nested in LocalBusiness         |
+
+**Sitemap (`src/app/sitemap.ts`):**
+
+```typescript
+// Dynamic sitemap that queries DB for dynamic pages
+// Static pages: define manually with priority
+// Dynamic pages: query DB and map to URLs
+// Priority scale: homepage 1.0, key pages 0.9, secondary 0.7-0.8, low 0.5
+```
+
+**Robots (`src/app/robots.ts`):**
+
+```typescript
+// Allow: /
+// Disallow: /api/, /login, /dashboard/, any private routes
+// Include sitemap URL
+```
+
+**AI Engine Optimization (llms.txt):**
+
+```
+// public/llms.txt -- concise summary (under 50 lines)
+// Business name, location, hours, services, team, highlights, contact, FAQ link
+
+// public/llms-full.txt -- comprehensive reference
+// Full service descriptions, team bios, FAQ with answers, areas served, reviews
+```
+
+**FAQ data (`src/lib/faq.ts`):**
+
+```typescript
+// Shared array of { question, answer } objects
+// Used for: JSON-LD FAQPage schema, AI engine answers, potential FAQ page
+// Keep answers concise and keyword-rich
+```
+
+**OG image requirements:**
+
+- Minimum 1200x630px
+- WebP format preferred
+- Include business branding
+- Descriptive alt text
+- Place in `public/images/`
+
+**SEO verification checklist:**
+
+- [ ] `metadataBase` set to production URL
+- [ ] Root layout has title template, description, keywords, OG, Twitter
+- [ ] Every public page has unique title and description
+- [ ] `sitemap.ts` generates valid XML with all public pages
+- [ ] `robots.ts` blocks private routes, includes sitemap URL
+- [ ] JSON-LD on homepage (LocalBusiness + WebSite + FAQ)
+- [ ] JSON-LD on service pages (Service schema)
+- [ ] JSON-LD on team/profile pages (Person schema)
+- [ ] Breadcrumb JSON-LD on all pages except homepage
+- [ ] `manifest.webmanifest` with correct name, colors, icons
+- [ ] `llms.txt` and `llms-full.txt` in public directory
+- [ ] FAQ data centralized and used in JSON-LD
+- [ ] OG image exists and is referenced
+- [ ] Private pages (login, dashboard, intake) set to `noindex`
+- [ ] Canonical URLs set on all pages
+- [ ] No duplicate titles or descriptions across pages
+
+---
+
+## Step 7: Project Ready
+
+Once setup is complete (Steps 5 + 6), display:
 
 ```
 =============================================
@@ -190,14 +792,21 @@ Once setup is complete, display:
       Setup Complete
 =============================================
 
-All dependencies installed.
-Linting & formatting configured.
-Testing framework ready.
-Security basics applied.
-Environment validation configured.
-Initial audit: PASS
+CODEBASE
+  All dependencies installed.
+  Linting & formatting configured.
+  Testing framework ready.
+  Security basics applied.
+  Environment validation configured.
+  Initial audit: PASS
 
-Governance files created:
+INFRASTRUCTURE
+  GitHub:     Repo created, remote set
+  PostgreSQL: Database + user created, schema pushed, seed run
+  SEO:        Metadata, sitemap, robots, JSON-LD, llms.txt ready
+  NGINX:      Deferred to VPS phase
+
+GOVERNANCE
   CLAUDE.md        -- Project instructions
   HANDOFF.md       -- Session continuity
   AUDIT.md         -- Quality & issues
@@ -1188,9 +1797,11 @@ Score this document quarterly:
 
 Every change to this document must be logged:
 
-| Date | Section | What Changed | Why (what triggered it) |
-| ---- | ------- | ------------ | ----------------------- |
-|      |         |              |                         |
+| Date       | Section          | What Changed                                                                                         | Why (what triggered it)                                                         |
+| ---------- | ---------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 2026-03-09 | Step 2           | PostgreSQL self-hosted as default DB, removed Supabase as example. Auth.js replaces Supabase Auth     | Studio preference: PostgreSQL always, no more Supabase                          |
+| 2026-03-09 | Step 6 (NEW)     | Added Infrastructure Foundation: 6a GitHub, 6b PostgreSQL, 6c NGINX, 6d SEO -- full setup guides     | Missing practical how-to for foundational infrastructure that every project needs |
+| 2026-03-09 | Step 7 (was 6)   | Updated Project Ready display to include infrastructure status section                                | Reflects new Step 6 infrastructure requirements                                 |
 
 ---
 
