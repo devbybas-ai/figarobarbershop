@@ -46,6 +46,16 @@ function getClientIp(request: NextRequest): string {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Skip static assets and internal Next.js requests
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/images") ||
+    pathname.startsWith("/favicon") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
   // --- Rate limiting on POST to specific endpoints ---
   if (request.method === "POST") {
     const rule = RATE_LIMITED_PATHS[pathname];
