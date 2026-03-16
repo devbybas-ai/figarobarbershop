@@ -251,7 +251,7 @@ export default function BarberProfilePage({ params }: { params: Promise<{ slug: 
                   Book with {barber.firstName}
                 </Link>
                 <a
-                  href="tel:+17607512008"
+                  href="tel:+17607012038"
                   className="rounded-sm border border-figaro-cream/20 px-8 py-3.5 text-base font-semibold text-figaro-cream/70 transition-colors hover:border-figaro-cream/40 hover:text-figaro-cream"
                 >
                   Call the Shop

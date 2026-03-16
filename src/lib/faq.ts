@@ -3,7 +3,7 @@ export const FAQS = [
   {
     question: "Does Figaro Barbershop accept walk-ins?",
     answer:
-      "Yes, walk-ins are always welcome at Figaro Barbershop Leucadia. You can also book online at figaroleucadia.com/book or call (760) 751-2008.",
+      "Yes, walk-ins are always welcome at Figaro Barbershop Leucadia. You can also book online at figaroleucadia.com/book or call (760) 701-2038.",
   },
   {
     question: "Where is Figaro Barbershop located?",
@@ -27,7 +27,7 @@ export const FAQS = [
   {
     question: "How do I book an appointment at Figaro Barbershop?",
     answer:
-      "You can book online at figaroleucadia.com/book, walk in anytime during business hours, or call (760) 751-2008.",
+      "You can book online at figaroleucadia.com/book, walk in anytime during business hours, or call (760) 701-2038.",
   },
   {
     question: "What services does Figaro Barbershop offer?",

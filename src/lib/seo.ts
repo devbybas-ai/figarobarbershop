@@ -9,9 +9,9 @@ export const BUSINESS = {
     "Premium barbershop in Leucadia, Encinitas serving the North County San Diego community. Hispanic-owned. Walk-ins welcome.",
   shortDescription:
     "Where style meets tradition. Leucadia's finest barbershop in Encinitas, California.",
-  phone: "+1-760-751-2008",
-  phoneDisplay: "(760) 751-2008",
-  email: "info@figaroleucadia.com",
+  phone: "+1-760-701-2038",
+  phoneDisplay: "(760) 701-2038",
+  email: "barbershopleucadia@gmail.com",
   address: {
     street: "114 Leucadia Blvd",
     city: "Encinitas",
@@ -24,9 +24,9 @@ export const BUSINESS = {
     longitude: -117.2929,
   },
   hours: [
-    { days: "Monday-Friday", open: "09:00", close: "19:00" },
-    { days: "Saturday", open: "08:00", close: "17:00" },
-    { days: "Sunday", open: "09:00", close: "15:00" },
+    { days: "Monday-Friday", open: "10:30", close: "18:30" },
+    { days: "Saturday", open: "10:00", close: "16:00" },
+    { days: "Sunday", open: "10:00", close: "16:00" },
   ],
   social: {
     instagram: "https://www.instagram.com/figaroleucadia/",

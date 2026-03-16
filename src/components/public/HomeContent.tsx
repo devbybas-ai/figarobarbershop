@@ -292,10 +292,10 @@ export function HomeContent() {
                 Book Now
               </Link>
               <a
-                href="tel:+17607512008"
+                href="tel:+17607012038"
                 className="rounded-sm border border-white/30 px-8 py-3.5 text-base font-semibold text-white transition-colors hover:border-white hover:bg-white/10"
               >
-                Call (760) 751-2008
+                Call (760) 701-2038
               </a>
             </div>
           </motion.div>

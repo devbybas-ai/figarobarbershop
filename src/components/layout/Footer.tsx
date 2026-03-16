@@ -85,16 +85,16 @@ export function Footer() {
                 <p>Encinitas, CA 92024</p>
               </a>
               <p className="pt-1">
-                <a href="tel:+17607512008" className="transition-colors hover:text-figaro-teal">
-                  (760) 751-2008
+                <a href="tel:+17607012038" className="transition-colors hover:text-figaro-teal">
+                  (760) 701-2038
                 </a>
               </p>
               <p>
                 <a
-                  href="mailto:barbarospleucadia@gmail.com"
+                  href="mailto:barbershopleucadia@gmail.com"
                   className="transition-colors hover:text-figaro-teal"
                 >
-                  barbarospleucadia@gmail.com
+                  barbershopleucadia@gmail.com
                 </a>
               </p>
               <div className="flex gap-3 pt-2">

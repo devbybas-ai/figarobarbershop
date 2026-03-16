@@ -5,14 +5,14 @@ import { SITE_URL } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Contact & Location — 114 Leucadia Blvd, Encinitas, CA",
   description:
-    "Visit Figaro Barbershop at 114 Leucadia Blvd, Encinitas, CA 92024. Call (760) 751-2008. Open Monday–Saturday. Walk-ins welcome. Directions, hours, and contact info.",
+    "Visit Figaro Barbershop at 114 Leucadia Blvd, Encinitas, CA 92024. Call (760) 701-2038. Open Monday–Saturday. Walk-ins welcome. Directions, hours, and contact info.",
   alternates: {
     canonical: `${SITE_URL}/contact`,
   },
   openGraph: {
     title: "Contact & Location | Figaro Barbershop Leucadia",
     description:
-      "114 Leucadia Blvd, Encinitas, CA 92024. Call (760) 751-2008. Walk-ins welcome. Get directions and hours.",
+      "114 Leucadia Blvd, Encinitas, CA 92024. Call (760) 701-2038. Walk-ins welcome. Get directions and hours.",
     url: `${SITE_URL}/contact`,
   },
 };
@@ -69,19 +69,19 @@ export default function ContactPage() {
                 <div>
                   <p className="font-medium text-figaro-black">Phone</p>
                   <a
-                    href="tel:+17607512008"
+                    href="tel:+17607012038"
                     className="text-figaro-teal transition-colors hover:text-figaro-teal-dark"
                   >
-                    (760) 751-2008
+                    (760) 701-2038
                   </a>
                 </div>
                 <div>
                   <p className="font-medium text-figaro-black">Email</p>
                   <a
-                    href="mailto:barbarospleucadia@gmail.com"
+                    href="mailto:barbershopleucadia@gmail.com"
                     className="text-figaro-teal transition-colors hover:text-figaro-teal-dark"
                   >
-                    barbarospleucadia@gmail.com
+                    barbershopleucadia@gmail.com
                   </a>
                 </div>
                 <div className="flex gap-4 pt-2">
