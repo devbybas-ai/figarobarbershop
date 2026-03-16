@@ -20,7 +20,20 @@ export async function POST(req: Request) {
   if (authError) return NextResponse.json({ error: authError.error }, { status: authError.status });
 
   const body = await req.json();
-  const { firstName, lastName, email, phone, bio, commissionRate } = body;
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    bio,
+    commissionRate,
+    barberType,
+    boothRentAmount,
+    acceptedPaymentMethods,
+    zelleHandle,
+    cashappHandle,
+    venmoHandle,
+  } = body;
 
   if (!firstName || !lastName || typeof firstName !== "string" || typeof lastName !== "string") {
     return NextResponse.json({ error: "First name and last name are required" }, { status: 400 });
@@ -57,6 +70,12 @@ export async function POST(req: Request) {
         phone: phone ?? null,
         bio: bio ?? null,
         commissionRate: commissionRate ?? 0,
+        barberType: barberType === "BOOTH_RENTAL" ? "BOOTH_RENTAL" : "COMMISSION",
+        boothRentAmount: barberType === "BOOTH_RENTAL" ? (boothRentAmount ?? null) : null,
+        acceptedPaymentMethods: acceptedPaymentMethods ?? ["CASH", "CARD"],
+        zelleHandle: zelleHandle ?? null,
+        cashappHandle: cashappHandle ?? null,
+        venmoHandle: venmoHandle ?? null,
         isActive: true,
         user: { connect: { id: user.id } },
       },
@@ -125,7 +144,19 @@ export async function PATCH(req: Request) {
   if (authError) return NextResponse.json({ error: authError.error }, { status: authError.status });
 
   const body = await req.json();
-  const { id, firstName, lastName, commissionRate, isActive } = body;
+  const {
+    id,
+    firstName,
+    lastName,
+    commissionRate,
+    isActive,
+    barberType,
+    boothRentAmount,
+    acceptedPaymentMethods,
+    zelleHandle,
+    cashappHandle,
+    venmoHandle,
+  } = body;
 
   if (!id || typeof id !== "string") {
     return NextResponse.json({ error: "Barber ID is required" }, { status: 400 });
@@ -143,6 +174,14 @@ export async function PATCH(req: Request) {
     updates.commissionRate = commissionRate;
   }
   if (isActive !== undefined && typeof isActive === "boolean") updates.isActive = isActive;
+  if (barberType === "COMMISSION" || barberType === "BOOTH_RENTAL") {
+    updates.barberType = barberType;
+  }
+  if (boothRentAmount !== undefined) updates.boothRentAmount = boothRentAmount;
+  if (Array.isArray(acceptedPaymentMethods)) updates.acceptedPaymentMethods = acceptedPaymentMethods;
+  if (zelleHandle !== undefined) updates.zelleHandle = zelleHandle || null;
+  if (cashappHandle !== undefined) updates.cashappHandle = cashappHandle || null;
+  if (venmoHandle !== undefined) updates.venmoHandle = venmoHandle || null;
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });

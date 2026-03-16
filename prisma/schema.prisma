@@ -10,18 +10,20 @@ datasource db {
 // === AUTH (NextAuth) ===
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String?
-  role          UserRole  @default(STAFF)
-  accounts      Account[]
-  sessions      Session[]
-  barber        Barber?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String             @id @default(cuid())
+  name              String?
+  email             String             @unique
+  emailVerified     DateTime?
+  image             String?
+  passwordHash      String?
+  role              UserRole           @default(STAFF)
+  accounts          Account[]
+  sessions          Session[]
+  barber            Barber?
+  campaignTemplates CampaignTemplate[]
+  campaigns         Campaign[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@map("users")
 }
@@ -76,28 +78,46 @@ enum UserRole {
 // === BARBERS & STYLISTS ===
 
 model Barber {
-  id              String           @id @default(cuid())
-  userId          String?          @unique
-  user            User?            @relation(fields: [userId], references: [id])
-  firstName       String
-  lastName        String
-  phone           String?
-  title           String?
-  bio             String?
-  tagline         String?
-  specialties     String[]         @default([])
-  imageUrl        String?
-  instagram       String?
-  facebook        String?
-  tiktok          String?
-  commissionRate  Decimal          @default(0) @db.Decimal(5, 2)
-  isActive        Boolean          @default(true)
-  appointments    Appointment[]
-  schedules       BarberSchedule[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id                     String               @id @default(cuid())
+  userId                 String?              @unique
+  user                   User?                @relation(fields: [userId], references: [id])
+  firstName              String
+  lastName               String
+  phone                  String?
+  title                  String?
+  bio                    String?
+  tagline                String?
+  specialties            String[]             @default([])
+  imageUrl               String?
+  instagram              String?
+  facebook               String?
+  tiktok                 String?
+  commissionRate         Decimal              @default(0) @db.Decimal(5, 2)
+  barberType             BarberType           @default(COMMISSION)
+  boothRentAmount        Decimal?             @db.Decimal(10, 2)
+  acceptedPaymentMethods String[]             @default(["CASH", "CARD"])
+  zelleHandle            String?
+  cashappHandle          String?
+  venmoHandle            String?
+  squareMerchantId       String?
+  isActive               Boolean              @default(true)
+  appointments           Appointment[]
+  schedules              BarberSchedule[]
+  payments               Payment[]
+  transactions           BarberTransaction[]
+  loyaltyTransactions    LoyaltyTransaction[]
+  membershipPlans        MembershipPlan[]
+  campaigns              Campaign[]
+  preferredByClients     Client[]             @relation("PreferredBarber")
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
 
   @@map("barbers")
+}
+
+enum BarberType {
+  COMMISSION
+  BOOTH_RENTAL
 }
 
 model BarberSchedule {
@@ -115,21 +135,61 @@ model BarberSchedule {
   @@map("barber_schedules")
 }
 
+// === BARBER TRANSACTIONS ===
+
+model BarberTransaction {
+  id          String          @id @default(cuid())
+  barberId    String
+  barber      Barber          @relation(fields: [barberId], references: [id])
+  type        TransactionType
+  amount      Decimal         @db.Decimal(10, 2)
+  method      PaymentMethod?
+  description String?
+  date        DateTime        @default(now())
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("barber_transactions")
+}
+
+enum TransactionType {
+  SERVICE_PAYMENT
+  BOOTH_RENT
+  PRODUCT_PURCHASE
+  TIP
+  ADJUSTMENT
+}
+
 // === CLIENTS ===
 
 model Client {
-  id              String         @id @default(cuid())
-  firstName       String
-  lastName        String
-  email           String?        @unique
-  phone           String?
-  intakeCompleted Boolean        @default(false)
-  intakeData      Json?
-  notes           String?
-  appointments    Appointment[]
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  deletedAt       DateTime?
+  id                  String              @id @default(cuid())
+  firstName           String
+  lastName            String
+  email               String?             @unique
+  phone               String?
+  passwordHash        String?
+  emailVerified       DateTime?
+  preferredBarberId   String?
+  preferredBarber     Barber?             @relation("PreferredBarber", fields: [preferredBarberId], references: [id])
+  loyaltyPoints       Int                 @default(0)
+  loyaltyTierId       String?
+  loyaltyTier         LoyaltyTier?        @relation(fields: [loyaltyTierId], references: [id])
+  totalVisits         Int                 @default(0)
+  totalSpent          Decimal             @default(0) @db.Decimal(10, 2)
+  stripeCustomerId    String?             @unique
+  emailOptOut         Boolean             @default(false)
+  intakeCompleted     Boolean             @default(false)
+  intakeData          Json?
+  notes               String?
+  appointments        Appointment[]
+  pointTransactions   LoyaltyTransaction[]
+  redemptions         LoyaltyRedemption[]
+  subscriptions       Subscription[]
+  campaignRecipients  CampaignRecipient[]
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  deletedAt           DateTime?
 
   @@map("clients")
 }
@@ -145,6 +205,7 @@ model Service {
   price            Decimal           @db.Decimal(10, 2)
   isActive         Boolean           @default(true)
   appointmentItems AppointmentItem[]
+  loyaltyRewards   LoyaltyReward[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -162,22 +223,24 @@ enum ServiceCategory {
 // === APPOINTMENTS ===
 
 model Appointment {
-  id              String            @id @default(cuid())
-  clientId        String
-  client          Client            @relation(fields: [clientId], references: [id])
-  barberId        String
-  barber          Barber            @relation(fields: [barberId], references: [id])
-  status          AppointmentStatus @default(SCHEDULED)
-  type            AppointmentType   @default(BOOKED)
-  scheduledAt     DateTime
-  completedAt     DateTime?
-  cancelledAt     DateTime?
-  notes           String?
-  totalPrice      Decimal?          @db.Decimal(10, 2)
-  items           AppointmentItem[]
-  payment         Payment?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id                String             @id @default(cuid())
+  clientId          String
+  client            Client             @relation(fields: [clientId], references: [id])
+  barberId          String
+  barber            Barber             @relation(fields: [barberId], references: [id])
+  status            AppointmentStatus  @default(SCHEDULED)
+  type              AppointmentType    @default(BOOKED)
+  scheduledAt       DateTime
+  completedAt       DateTime?
+  cancelledAt       DateTime?
+  notes             String?
+  totalPrice        Decimal?           @db.Decimal(10, 2)
+  items             AppointmentItem[]
+  payment           Payment?
+  redemptions       LoyaltyRedemption[]
+  subscriptionUsage SubscriptionUsage?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@map("appointments")
 }
@@ -212,10 +275,17 @@ model Payment {
   id              String        @id @default(cuid())
   appointmentId   String        @unique
   appointment     Appointment   @relation(fields: [appointmentId], references: [id])
+  barberId        String?
+  barber          Barber?       @relation(fields: [barberId], references: [id])
   amount          Decimal       @db.Decimal(10, 2)
   method          PaymentMethod
   stripePaymentId String?
   status          PaymentStatus @default(PENDING)
+  processedBy     String?
+  tip             Decimal?      @db.Decimal(10, 2)
+  shopCut         Decimal?      @db.Decimal(10, 2)
+  barberCut       Decimal?      @db.Decimal(10, 2)
+  notes           String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -226,6 +296,11 @@ enum PaymentMethod {
   CASH
   CARD
   STRIPE
+  ZELLE
+  CASHAPP
+  SQUARE
+  VENMO
+  OTHER
 }
 
 enum PaymentStatus {
@@ -233,6 +308,249 @@ enum PaymentStatus {
   COMPLETED
   REFUNDED
   FAILED
+}
+
+// === LOYALTY PROGRAM ===
+
+model LoyaltyTier {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  minVisits        Int      @default(0)
+  minSpent         Decimal  @default(0) @db.Decimal(10, 2)
+  pointsMultiplier Decimal  @default(1.0) @db.Decimal(3, 2)
+  perks            String[] @default([])
+  color            String?
+  sortOrder        Int      @default(0)
+  clients          Client[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("loyalty_tiers")
+}
+
+model LoyaltyTransaction {
+  id          String        @id @default(cuid())
+  clientId    String
+  client      Client        @relation(fields: [clientId], references: [id])
+  points      Int
+  type        LoyaltyTxType
+  source      String?
+  description String?
+  barberId    String?
+  barber      Barber?       @relation(fields: [barberId], references: [id])
+  createdAt   DateTime      @default(now())
+
+  @@map("loyalty_transactions")
+}
+
+enum LoyaltyTxType {
+  EARN
+  REDEEM
+  ADJUST
+  EXPIRE
+}
+
+model LoyaltyReward {
+  id          String              @id @default(cuid())
+  name        String
+  description String?
+  pointsCost  Int
+  type        RewardType
+  value       Decimal             @db.Decimal(10, 2)
+  serviceId   String?
+  service     Service?            @relation(fields: [serviceId], references: [id])
+  isActive    Boolean             @default(true)
+  redemptions LoyaltyRedemption[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@map("loyalty_rewards")
+}
+
+enum RewardType {
+  DISCOUNT_FIXED
+  DISCOUNT_PERCENT
+  FREE_SERVICE
+}
+
+model LoyaltyRedemption {
+  id            String           @id @default(cuid())
+  clientId      String
+  client        Client           @relation(fields: [clientId], references: [id])
+  rewardId      String
+  reward        LoyaltyReward    @relation(fields: [rewardId], references: [id])
+  appointmentId String?
+  appointment   Appointment?     @relation(fields: [appointmentId], references: [id])
+  pointsSpent   Int
+  status        RedemptionStatus @default(PENDING)
+  redeemedAt    DateTime         @default(now())
+
+  @@map("loyalty_redemptions")
+}
+
+enum RedemptionStatus {
+  PENDING
+  APPLIED
+  EXPIRED
+  CANCELLED
+}
+
+// === MEMBERSHIPS & SUBSCRIPTIONS ===
+
+model MembershipPlan {
+  id              String           @id @default(cuid())
+  name            String
+  description     String?
+  tier            MembershipTier
+  billingCycle    PlanBillingCycle
+  price           Decimal          @db.Decimal(10, 2)
+  includedVisits  Int
+  discountPercent Decimal          @default(0) @db.Decimal(5, 2)
+  perks           String[]         @default([])
+  barberId        String?
+  barber          Barber?          @relation(fields: [barberId], references: [id])
+  stripePriceId   String?          @unique
+  isActive        Boolean          @default(true)
+  subscriptions   Subscription[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("membership_plans")
+}
+
+enum MembershipTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum PlanBillingCycle {
+  WEEKLY
+  MONTHLY
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  clientId             String
+  client               Client             @relation(fields: [clientId], references: [id])
+  planId               String
+  plan                 MembershipPlan     @relation(fields: [planId], references: [id])
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeSubscriptionId String?            @unique
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  visitsUsed           Int                @default(0)
+  pausedAt             DateTime?
+  cancelledAt          DateTime?
+  usageLogs            SubscriptionUsage[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@map("subscriptions")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+  PAST_DUE
+  EXPIRED
+}
+
+model SubscriptionUsage {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  appointmentId  String       @unique
+  appointment    Appointment  @relation(fields: [appointmentId], references: [id])
+  redeemedAt     DateTime     @default(now())
+
+  @@map("subscription_usage")
+}
+
+// === MARKETING ===
+
+model CampaignTemplate {
+  id          String          @id @default(cuid())
+  name        String
+  subject     String?
+  htmlBody    String
+  textBody    String?
+  channel     CampaignChannel
+  createdById String
+  createdBy   User            @relation(fields: [createdById], references: [id])
+  campaigns   Campaign[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("campaign_templates")
+}
+
+model Campaign {
+  id             String             @id @default(cuid())
+  name           String
+  scope          CampaignScope
+  channel        CampaignChannel
+  status         CampaignStatus     @default(DRAFT)
+  templateId     String?
+  template       CampaignTemplate?  @relation(fields: [templateId], references: [id])
+  subject        String?
+  htmlBody       String?
+  textBody       String?
+  barberId       String?
+  barber         Barber?            @relation(fields: [barberId], references: [id])
+  createdById    String
+  createdBy      User               @relation(fields: [createdById], references: [id])
+  scheduledFor   DateTime?
+  sentAt         DateTime?
+  recipientCount Int                @default(0)
+  deliveredCount Int                @default(0)
+  openedCount    Int                @default(0)
+  clickedCount   Int                @default(0)
+  trackingCode   String?            @unique
+  recipients     CampaignRecipient[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@map("campaigns")
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+}
+
+enum CampaignChannel {
+  EMAIL
+  SMS
+}
+
+enum CampaignScope {
+  SHOP
+  BARBER
+}
+
+model CampaignRecipient {
+  id         String    @id @default(cuid())
+  campaignId String
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  clientId   String
+  client     Client    @relation(fields: [clientId], references: [id])
+  email      String?
+  phone      String?
+  delivered  Boolean   @default(false)
+  opened     Boolean   @default(false)
+  clicked    Boolean   @default(false)
+  booked     Boolean   @default(false)
+  sentAt     DateTime?
+  openedAt   DateTime?
+  clickedAt  DateTime?
+
+  @@map("campaign_recipients")
 }
 
 // === INVENTORY ===

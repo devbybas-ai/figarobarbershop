@@ -1,7 +1,7 @@
 # Figaro Command Center - Session Handoff
 
-> Last updated: 2026-03-09
-> Session: 11 (complete)
+> Last updated: 2026-03-15
+> Session: 12 (complete)
 
 ## Current State
 
@@ -294,22 +294,52 @@
 - **Seed fix**: Added `payment.deleteMany()` before appointments to fix FK constraint on re-seed
 - All quality gates passing: type-check (0), lint (0), format (clean), test (6/6), build (44 routes)
 
+### Done (Session 12)
+
+- **Contact info corrected**: Phone updated to (760) 701-2038, email to barbershopleucadia@gmail.com, SEO hours to real hours (Mon-Fri 10:30-6:30, Sat-Sun 10-4) across all 6 files
+- **Dev:clean script**: Added `pnpm dev:clean` (rimraf .next && next dev) to prevent stale cache issues
+- **Middleware optimization**: Skip static assets (_next, images, favicon, files with extensions) in middleware
+- **Schema foundation for 5 future features** (single migration):
+  - 11 new enums: BarberType, TransactionType, LoyaltyTxType, RewardType, RedemptionStatus, MembershipTier, PlanBillingCycle, SubscriptionStatus, CampaignStatus, CampaignChannel, CampaignScope
+  - 12 new models: BarberTransaction, LoyaltyTier, LoyaltyTransaction, LoyaltyReward, LoyaltyRedemption, MembershipPlan, Subscription, SubscriptionUsage, CampaignTemplate, Campaign, CampaignRecipient
+  - PaymentMethod enum expanded: ZELLE, CASHAPP, SQUARE, VENMO, OTHER
+  - Client model: added passwordHash, emailVerified, preferredBarberId, loyaltyPoints, totalVisits, totalSpent, stripeCustomerId, emailOptOut
+  - Barber model: added barberType (COMMISSION/BOOTH_RENTAL), boothRentAmount, acceptedPaymentMethods, zelleHandle, cashappHandle, venmoHandle, squareMerchantId
+  - Payment model: added barberId, processedBy, tip, shopCut, barberCut, notes
+  - Database reset + fresh init migration (local dev only)
+- **Barber Business Units — Commission vs Booth Rental**:
+  - `POST /api/payments` expanded: tip tracking, auto commission calculation (shopCut/barberCut from commissionRate), expanded payment methods, barberId attribution
+  - `POST/PATCH /api/barbers/manage` updated: barberType, boothRentAmount, acceptedPaymentMethods, payment handles (Zelle/CashApp/Venmo)
+  - Commission flow: shop processes payment → shopCut = amount × (1 - rate/100), barberCut = amount × rate/100
+  - Booth-rental flow: barber logs payment directly → shopCut = 0, barberCut = full amount
+- **4 new API routes**:
+  - `GET /api/barbers/[slug]/dashboard` — barber's personal stats (today's appointments, revenue, tips, weekly stats, upcoming, recent payments)
+  - `GET /api/barbers/[slug]/calendar` — day/week calendar with appointments + schedule overlay
+  - `GET/POST /api/barbers/[slug]/transactions` — commission barbers see payments, booth-rental see self-logged transactions
+  - `GET /api/analytics/revenue` — owner-only revenue reporting (per-barber breakdown, commission owed, booth rent, payment method breakdown)
+- **Role-based sidebar navigation**: Barbers see My Dashboard/Calendar/Register/Transactions/Profile; Owner sees everything; Receptionist/Staff see overview/register/appointments/clients
+- **5 new dashboard pages**:
+  - `/dashboard/my-dashboard` — barber's personal overview (stats cards, today's queue, upcoming appointments, recent payments)
+  - `/dashboard/my-calendar` — day view with schedule overlay, date navigation, appointment cards with status/payment info
+  - `/dashboard/my-register` — barber's payment processing (expanded payment methods for booth-rental, checkout flow with tip input)
+  - `/dashboard/my-transactions` — transaction history table with earnings/tips summary
+  - `/dashboard/revenue` — owner-only revenue report (gross/shop/commission/tips totals, booth rent tracking, payment method breakdown, per-barber table)
+- All quality gates passing: type-check (0), lint (0), test (6/6)
+
 ### Blockers
 
 - None
 
-### Next Steps (Session 12)
+### Next Steps (Session 13)
 
-1. Review 2 borderline images flagged in Session 8 (owner confirmation needed)
-2. Integrate Instagram Graph API for live feed on public site
-3. Integrate Stripe Connect for real payments (pending owner decision on Fresha vs custom)
-4. Barber onboarding flow: proper password setup process when Ricardo adds a barber (depends on Resend)
-5. Add E2E tests for login flow, booking flow, intake form
-6. Add more unit tests for API routes and auth helpers
-7. Convert barber photos to avif for performance optimization
-8. Configure Resend for production email delivery (intake emails, booking confirmations)
-9. Register/POS page fine-tuning
-10. SME agent list for BuiltByBasProjectSetup
+1. Update seed data to set barber types (commission vs booth-rental) and remove fake clients
+2. Client Portal (Phase 2): client auth, portal pages, booking within portal
+3. Loyalty Program (Phase 3): points engine, tiers, rewards, redemption
+4. Memberships & Subscriptions (Phase 4): plans, Stripe subscriptions, visit tracking
+5. Marketing Center (Phase 5): email campaigns, templates, audience engine, tracking
+6. Review 2 borderline images flagged in Session 8
+7. Stripe frontend completion (payment forms)
+8. E2E tests for key flows
 
 ## Decisions Made
 
@@ -353,3 +383,4 @@
 | 9       | 2026-03-09 | Fixed Sunday schedule bug on barber profiles. VPS production debugging (UntrustedHost, corrupted build). Send Intake button with email/link delivery. Client soft-delete (OWNER only). Intake form pre-fill from query params. All quality gates passing.            |
 | 10      | 2026-03-09 | Backend review + major feature build. Register/POS page, services CRUD, My Profile fix + photo upload, intake kiosk mode, policy pages (privacy/terms/cancellation), soft-delete re-registration fix, test data cleanup. Type-check clean.                           |
 | 11      | 2026-03-09 | Backend completion. Owner master access, inventory CRUD, rate limiting, real analytics, barber DB fields, book page refactor. 5 tech debt items resolved (TD-004/005/006/008). All 5 quality gates passing.                                                           |
+| 12      | 2026-03-15 | Feature expansion Phase 1. Schema foundation (11 enums, 12 models). Barber business units (commission vs booth-rental). Expanded payments (tips, 8 methods, commission calc). 4 new APIs + 5 new dashboard pages. Role-based sidebar. Contact info corrected. All quality gates passing. |
