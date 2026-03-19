@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figaro Barbershop - Platform Feature Breakdown</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --color-charcoal: #1a1a2e;
+      --color-dark: #16213e;
+      --color-gold: #c8a951;
+      --color-gold-light: #e8d48b;
+      --color-teal: #2a9d8f;
+      --color-teal-dark: #1f7a6f;
+      --color-cream: #faf8f5;
+      --color-warm-gray: #6b6b6b;
+      --color-light-border: #e5e1db;
+      --color-section-alt: #f5f2ed;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--color-charcoal);
+      background: var(--color-cream);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---- COVER ---- */
+    .cover {
+      background: #000000;
+      color: #fff;
+      padding: 80px 40px;
+      text-align: center;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(200, 169, 81, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(42, 157, 143, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      border: 1px solid var(--color-gold);
+      color: var(--color-gold);
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .cover h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .cover h1 span {
+      color: var(--color-gold);
+    }
+
+    .cover .subtitle {
+      font-size: 18px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .cover-meta {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      position: relative;
+    }
+
+    .cover-meta strong {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .cover-logo {
+      width: 140px;
+      height: auto;
+      margin-bottom: 24px;
+      border-radius: 12px;
+      position: relative;
+      filter: brightness(0) invert(1);
+    }
+
+    .cover-tagline {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--color-gold-light);
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .cover-divider {
+      width: 60px;
+      height: 2px;
+      background: var(--color-gold);
+      margin: 0 auto 32px;
+      position: relative;
+    }
+
+    /* ---- LAYOUT ---- */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ---- EXECUTIVE SUMMARY ---- */
+    .executive-summary {
+      padding: 64px 0;
+      border-bottom: 1px solid var(--color-light-border);
+    }
+
+    .executive-summary h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: var(--color-charcoal);
+    }
+
+    .executive-summary p {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--color-warm-gray);
+      margin-bottom: 16px;
+    }
+
+    .highlight-box {
+      background: #000000;
+      color: #fff;
+      border-radius: 12px;
+      padding: 32px;
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 24px;
+    }
+
+    .highlight-stat {
+      text-align: center;
+    }
+
+    .highlight-stat .number {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--color-gold);
+      display: block;
+    }
+
+    .highlight-stat .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 4px;
+    }
+
+    /* ---- SECTION HEADERS ---- */
+    .section {
+      padding: 56px 0;
+      border-bottom: 1px solid var(--color-light-border);
+    }
+
+    .section:last-child {
+      border-bottom: none;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .section-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .section-icon.gold { background: rgba(200, 169, 81, 0.12); }
+    .section-icon.teal { background: rgba(42, 157, 143, 0.12); }
+    .section-icon.dark { background: rgba(26, 26, 46, 0.08); }
+
+    .section h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .section-intro {
+      font-size: 15px;
+      color: var(--color-warm-gray);
+      margin-bottom: 32px;
+      max-width: 720px;
+    }
+
+    /* ---- FEATURE CARDS ---- */
+    .feature-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: #fff;
+      border: 1px solid var(--color-light-border);
+      border-radius: 10px;
+      padding: 28px 28px 24px;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .feature-card:hover {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .feature-card h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--color-charcoal);
+    }
+
+    .feature-card .what-it-does {
+      font-size: 14px;
+      color: var(--color-warm-gray);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .feature-card .problem-solved {
+      font-size: 13px;
+      color: var(--color-teal-dark);
+      background: rgba(42, 157, 143, 0.06);
+      border-left: 3px solid var(--color-teal);
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      line-height: 1.6;
+    }
+
+    .feature-card .problem-solved strong {
+      font-weight: 600;
+    }
+
+    /* ---- PHASE BADGE ---- */
+    .phase-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    .phase-badge.live {
+      background: rgba(42, 157, 143, 0.1);
+      color: var(--color-teal-dark);
+    }
+
+    .phase-badge.planned {
+      background: rgba(200, 169, 81, 0.12);
+      color: #9a7e2e;
+    }
+
+    /* ---- FUTURE PHASES ---- */
+    .future-section {
+      background: var(--color-section-alt);
+      padding: 56px 0;
+    }
+
+    .future-section .section {
+      border-bottom: none;
+      padding: 0;
+    }
+
+    .phase-timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .phase-timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--color-light-border);
+    }
+
+    .phase-block {
+      position: relative;
+      margin-bottom: 40px;
+    }
+
+    .phase-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .phase-block::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 8px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-gold);
+      border: 3px solid var(--color-section-alt);
+    }
+
+    .phase-block h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .phase-block .phase-desc {
+      font-size: 14px;
+      color: var(--color-warm-gray);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+
+    .phase-features {
+      list-style: none;
+      padding: 0;
+    }
+
+    .phase-features li {
+      font-size: 14px;
+      color: var(--color-charcoal);
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .phase-features li:last-child {
+      border-bottom: none;
+    }
+
+    .phase-features li::before {
+      content: '\2022';
+      color: var(--color-gold);
+      font-size: 18px;
+      line-height: 1.4;
+      flex-shrink: 0;
+    }
+
+    /* ---- TECH OVERVIEW ---- */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .tech-item {
+      background: #fff;
+      border: 1px solid var(--color-light-border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .tech-item h4 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--color-warm-gray);
+      margin-bottom: 8px;
+    }
+
+    .tech-item p {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-charcoal);
+    }
+
+    /* ---- REPLACES BAR ---- */
+    .replaces-bar {
+      margin-top: 32px;
+      background: #000;
+      border-radius: 10px;
+      padding: 24px 28px;
+      color: #fff;
+    }
+
+    .replaces-bar h4 {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      margin-bottom: 14px;
+    }
+
+    .replaces-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .replaces-col h5 {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+    }
+
+    .replaces-col.before h5 { color: rgba(255,255,255,0.4); }
+    .replaces-col.after h5 { color: var(--color-teal); }
+
+    .replaces-col ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .replaces-col ul li {
+      font-size: 12px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.65);
+      padding: 2px 0;
+    }
+
+    .replaces-col.after ul li {
+      color: rgba(255,255,255,0.85);
+    }
+
+    .replaces-arrow {
+      color: var(--color-gold);
+      font-size: 24px;
+      padding-top: 28px;
+      text-align: center;
+    }
+
+    /* ---- FOOTER ---- */
+    .doc-footer {
+      background: var(--color-charcoal);
+      color: rgba(255, 255, 255, 0.5);
+      padding: 40px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .doc-footer .company {
+      color: var(--color-gold);
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    /* ---- DOWNLOAD BUTTON ---- */
+    .download-btn {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: linear-gradient(135deg, var(--color-teal), var(--color-teal-dark));
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(42, 157, 143, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(42, 157, 143, 0.45);
+    }
+
+    .download-btn:active {
+      transform: translateY(0);
+    }
+
+    .download-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ---- PRINT ---- */
+    @media print {
+      /* Global print setup */
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      body { font-size: 10px; margin: 0; padding: 0; }
+      .download-btn { display: none !important; }
+
+      /* Tighten spacing for print */
+      .container { max-width: 100%; padding: 0 16px; }
+      .executive-summary { padding: 28px 0; }
+      .section { padding: 28px 0; }
+      .feature-card { padding: 16px 18px 14px; margin-bottom: 0; }
+      .feature-card h3 { font-size: 14px; margin-bottom: 4px; }
+      .feature-card .what-it-does { font-size: 11px; line-height: 1.5; margin-bottom: 8px; }
+      .feature-card .problem-solved { font-size: 10px; padding: 6px 10px; line-height: 1.5; }
+      .feature-grid { gap: 10px; }
+      .section h2 { font-size: 20px; }
+      .section-intro { font-size: 12px; margin-bottom: 16px; }
+      .section-header { margin-bottom: 8px; }
+      .section-icon { width: 32px; height: 32px; font-size: 16px; border-radius: 8px; }
+      .phase-badge { font-size: 8px; padding: 2px 7px; margin-bottom: 8px; }
+      .highlight-box { padding: 16px; gap: 12px; margin-top: 16px; border-radius: 8px; grid-template-columns: repeat(4, 1fr) !important; }
+      .highlight-stat .number { font-size: 26px; }
+      .highlight-stat .label { font-size: 9px; }
+      .executive-summary h2 { font-size: 22px; margin-bottom: 12px; }
+      .executive-summary p { font-size: 12px; line-height: 1.6; margin-bottom: 8px; }
+
+      /* Cover page - no dedicated page, flows into content */
+      .cover { min-height: auto; padding: 32px 24px 28px; page-break-after: avoid; }
+      .cover::before { display: none; }
+      .cover h1 { font-size: 30px; margin-bottom: 8px; }
+      .cover .subtitle { font-size: 12px; margin-bottom: 16px; }
+      .cover-logo { width: 80px; margin-bottom: 12px; }
+      .cover-tagline { font-size: 10px; margin-bottom: 16px; letter-spacing: 3px; }
+      .cover-meta { font-size: 10px; gap: 14px; }
+      .cover-badge { font-size: 8px; padding: 3px 12px; margin-bottom: 12px; }
+      .cover-divider { margin: 0 auto 14px; width: 40px; }
+
+      /* Page break control - avoid breaks INSIDE cards, allow between them */
+      .feature-card { break-inside: avoid; page-break-inside: avoid; }
+      .phase-block { break-inside: avoid; page-break-inside: avoid; }
+      .highlight-box { break-inside: avoid; }
+      /* Sections flow continuously, no forced page breaks */
+      .section { page-break-before: auto; }
+
+      /* Future phases */
+      .future-section { padding: 28px 0; }
+      .phase-block { margin-bottom: 20px; }
+      .phase-block h3 { font-size: 16px; }
+      .phase-block .phase-desc { font-size: 11px; margin-bottom: 8px; }
+      .phase-features li { font-size: 11px; padding: 4px 0; }
+      .phase-timeline { padding-left: 20px; }
+
+      /* Tech grid */
+      .tech-grid { gap: 8px; margin-top: 12px; }
+      .tech-item { padding: 12px; }
+      .tech-item h4 { font-size: 9px; margin-bottom: 4px; }
+      .tech-item p { font-size: 11px; }
+
+      /* Replaces bars */
+      .replaces-bar { padding: 14px 18px; margin-top: 16px; border-radius: 6px; }
+      .replaces-bar h4 { font-size: 8px; margin-bottom: 8px; }
+      .replaces-col h5 { font-size: 8px; margin-bottom: 6px; }
+      .replaces-col ul li { font-size: 10px; line-height: 1.5; }
+      .replaces-arrow { font-size: 18px; padding-top: 20px; }
+      .replaces-bar { break-inside: avoid; page-break-inside: avoid; }
+
+      /* Footer */
+      .doc-footer { padding: 20px; font-size: 10px; }
+      .doc-footer .company { font-size: 12px; }
+    }
+
+    @media (max-width: 640px) {
+      .cover { padding: 48px 24px; }
+      .highlight-box { grid-template-columns: repeat(2, 1fr); }
+      .section { padding: 40px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER -->
+  <header class="cover">
+    <img src="images/figaro-logo.avif" alt="Figaro Barbershop Leucadia" class="cover-logo">
+    <span class="cover-badge">Platform Details</span>
+    <h1>Figaro Barbershop <span>Leucadia</span></h1>
+    <p class="cover-tagline">Encinitas, California</p>
+    <div class="cover-divider"></div>
+    <p class="subtitle">Complete Digital Platform -- Feature Breakdown &amp; Value Overview</p>
+    <div class="cover-meta">
+      <span><strong>Prepared for:</strong> Figaro Barbershop Leucadia</span>
+      <span><strong>Prepared by:</strong> Built by Bas</span>
+      <span><strong>Date:</strong> March 18, 2026</span>
+    </div>
+  </header>
+
+  <!-- EXECUTIVE SUMMARY -->
+  <div class="container">
+    <section class="executive-summary">
+      <h2>Executive Summary</h2>
+      <p>
+        The Figaro Barbershop platform is a custom-built, all-in-one digital solution designed specifically for Figaro Barbershop Leucadia. It replaces fragmented tools -- third-party booking platforms with recurring fees, disconnected systems, and an outdated website -- with a single, branded system that the shop owns completely.
+      </p>
+      <p>
+        This platform delivers a premium public-facing website that attracts and converts new clients, paired with a powerful internal administration dashboard that streamlines daily operations for the owner, barbers, and front desk staff.
+      </p>
+
+      <div class="highlight-box">
+        <div class="highlight-stat">
+          <span class="number">30+</span>
+          <span class="label">Features Built</span>
+        </div>
+        <div class="highlight-stat">
+          <span class="number">20+</span>
+          <span class="label">API Endpoints</span>
+        </div>
+        <div class="highlight-stat">
+          <span class="number">4</span>
+          <span class="label">Staff Roles</span>
+        </div>
+        <div class="highlight-stat">
+          <span class="number">7</span>
+          <span class="label">Future Phases</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- FEATURE SECTIONS -->
+  <div class="container">
+
+    <!-- PUBLIC WEBSITE -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon gold">&#127760;</div>
+        <h2>Public Website</h2>
+      </div>
+      <p class="section-intro">A branded, high-end website that establishes Figaro's digital presence, attracts walk-ins, and converts visitors into booked appointments.</p>
+
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Premium Homepage</h3>
+          <p class="what-it-does">A fully designed homepage featuring real shop photography, smooth scroll animations, customer testimonials, an Instagram feed integration, and prominent calls-to-action. Optimized for both desktop and mobile with a responsive layout built around the Figaro brand identity.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Replaces a basic or outdated web presence with a premium, branded experience that reflects the quality of the shop and builds trust with potential clients before they walk in the door.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Barber Directory &amp; Profiles</h3>
+          <p class="what-it-does">A "Meet the Crew" page showcasing each barber with their photo, title, specialties, and personal bio. Each barber has a dedicated profile page with a portfolio gallery of their work and a direct link to book with them.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Clients often choose a barbershop based on the barbers. Individual profiles let each barber build a personal brand under the Figaro umbrella, helping attract clients who want a specific style or expertise.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Online Booking System</h3>
+          <p class="what-it-does">A multi-step booking wizard that guides clients through selecting services, choosing a barber, picking an available date and time slot, and confirming their appointment. The availability engine checks each barber's real schedule and existing appointments to only show open slots.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Eliminates missed bookings from phone tag and DMs. Clients can self-serve 24/7, and the shop fills chairs without staff spending time on the phone. Real-time availability prevents double-booking.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Service Menu with Pricing</h3>
+          <p class="what-it-does">A categorized service menu (Haircuts, Beards, Shaves, Combos) displaying each service with its description, duration, and price. Categories are filterable and the page is designed to match Figaro's branding.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Clients know exactly what's available and what it costs before they arrive -- reducing "how much is a fade?" calls and setting clear expectations that prevent pricing surprises at checkout.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>New Client Intake Form</h3>
+          <p class="what-it-does">A digital intake form for new clients capturing contact information, preferred barber, and notes. Includes a kiosk mode that auto-resets after 8 seconds for iPad use at the front desk. Intake links can be emailed to clients in advance.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Replaces paper clipboards and manual data entry. Client information is captured digitally, saved to the database instantly, and linked to their profile for every future visit. No more lost intake sheets or illegible handwriting.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Contact &amp; Location</h3>
+          <p class="what-it-does">Contact page with the shop's phone number, email, address, business hours, amenity badges (Wi-Fi, AC, Walk-ins Welcome), and a direct link to Google Maps for navigation.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Ensures all essential business information is accurate, consistent, and easy to find -- reducing "what time do you close?" and "where are you located?" calls.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>SEO &amp; AI Search Optimization</h3>
+          <p class="what-it-does">Comprehensive search engine optimization including structured data (JSON-LD schemas for the business, services, barbers, and FAQs), dynamic sitemap generation, OpenGraph and Twitter Card metadata for social sharing, and dedicated files (llms.txt) to optimize visibility in AI-powered search tools like ChatGPT, Google AI, and Perplexity. Targeted local keyword strategy for high-value search terms including "Encinitas barber," "Encinitas barbershop," "wedding barbers," "local wedding barbershop," and neighborhood-specific terms to dominate local search results.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Makes Figaro rank higher when people search for "Encinitas barber," "barbershop near me," or "wedding barbers local" -- whether they're using Google, social media, or AI assistants. Targeted local SEO ensures Figaro appears before competitors for the searches that matter most.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Legal &amp; Policy Pages</h3>
+          <p class="what-it-does">Professionally written Privacy Policy, Terms of Service, and Cancellation Policy pages. Cancellation policy establishes a 2-hour notice requirement and documents the no-show policy.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Protects the business legally, sets clear expectations for clients, and reduces no-show disputes by establishing documented policies that clients agree to when booking.</div>
+        </div>
+
+      </div>
+
+      <div class="replaces-bar">
+        <h4>What This Replaces</h4>
+        <div class="replaces-grid">
+          <div class="replaces-col before">
+            <h5>Before</h5>
+            <ul>
+              <li>Outdated custom website at figaroleucadia.com</li>
+              <li>Third-party booking page as main online presence</li>
+              <li>No individual barber profiles or portfolios</li>
+              <li>No SEO strategy or AI search visibility</li>
+              <li>No cancellation or legal policies published</li>
+              <li>Intake handled through third-party platform</li>
+            </ul>
+          </div>
+          <div class="replaces-arrow">&#10132;</div>
+          <div class="replaces-col after">
+            <h5>After</h5>
+            <ul>
+              <li>Premium branded website Figaro owns</li>
+              <li>Built-in booking with zero platform fees</li>
+              <li>Each barber has a dedicated profile page</li>
+              <li>SEO + AI search optimized for Encinitas</li>
+              <li>Professional policy pages protecting the business</li>
+              <li>Custom intake with kiosk mode for iPad</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon teal">&#128736;</div>
+        <h2>Administration Dashboard</h2>
+      </div>
+      <p class="section-intro">The internal command center where the owner, barbers, and front desk staff manage daily operations -- from the day's appointments to revenue tracking.</p>
+
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Owner Dashboard Overview</h3>
+          <p class="what-it-does">A real-time overview showing today's appointment count, walk-ins received, revenue generated, active barbers on shift, and total registered clients. Designed to give the owner an instant pulse on the business the moment they log in.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> The owner no longer needs to ask "how'd we do today?" or check multiple sources. One screen shows exactly how the business is performing right now.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Appointment Management</h3>
+          <p class="what-it-does">A day-view appointment board with date navigation showing all appointments across all barbers. Appointments can be filtered by status (Scheduled, In Progress, Completed, Cancelled, No-Show) and updated in real-time as clients arrive and services are completed.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Replaces wall calendars, whiteboards, and mental tracking. The entire team sees the same schedule, reducing confusion about who's next, who's running behind, and which chair is open.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Front Desk Register</h3>
+          <p class="what-it-does">A complete front-desk workflow in one screen: a live queue showing today's clients and their status (Waiting, In Chair, Done, Paid), a walk-in check-in form with client selection and barber tap-to-assign, multi-service selection, checkout with cash/card payment processing and tip entry, and a QR code generator for the self-service kiosk intake form.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Replaces the front desk juggling act of sticky notes, memory, and shouting across the shop. Walk-ins are logged instantly, the queue is visible to everyone, and checkout is fast and tracked.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Client Management</h3>
+          <p class="what-it-does">A searchable client database showing all registered clients with their intake completion status, contact info, preferred barber, visit history, and total spend. Includes the ability to send intake forms via email, view client details, and soft-delete clients (preserving data integrity while removing them from active views).</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Builds a real client database the shop owns -- not locked in a third-party app. Enables personalized service ("Hey Marcus, same cut as last time?"), targeted marketing, and business insights on client retention.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Service Management</h3>
+          <p class="what-it-does">Full create, edit, and delete capability for the service menu. The owner can add new services, update pricing and descriptions, set durations, assign categories, and deactivate services that are no longer offered -- all without needing a developer.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Price changes and new services go live immediately without waiting for a website update. The public menu and internal booking system always reflect the current offerings.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Barber Management</h3>
+          <p class="what-it-does">The owner can manage barber profiles including their display name, title, commission rate, tagline, specialties, and whether they operate as a commission barber or booth renter. This controls what appears on the public website and how their earnings are calculated.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Supports both business models under one roof -- commission barbers and booth renters. Commission splits are calculated automatically, and barber profiles stay current without manual website updates.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Inventory &amp; Product Management</h3>
+          <p class="what-it-does">Product catalog with stock tracking, reorder thresholds, and quick-restock actions. The owner can add products with pricing, cost, and SKU, monitor stock levels at a glance, and delete products that are no longer carried.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> No more running out of pomade mid-week or guessing what needs to be reordered. Stock levels are tracked in real-time, and reorder alerts prevent stockouts that mean lost product sales.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Analytics Dashboard</h3>
+          <p class="what-it-does">A real-time analytics suite with week and month views, period-over-period comparison, and four key metrics: gross revenue, shop cut, commission owed, and total tips. Includes a revenue-by-day bar chart, service popularity breakdown (pie chart), and a top barbers leaderboard.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Transforms gut feelings into data-driven decisions. The owner can see which services are most popular, which days are busiest, and which barbers are driving the most revenue -- enabling smarter scheduling, pricing, and staffing.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Revenue Reporting (Owner Only)</h3>
+          <p class="what-it-does">A detailed revenue breakdown accessible only to the owner, showing gross revenue, the shop's cut, total commissions owed, tips collected, booth rent income, payment method distribution, and per-barber earnings in a sortable table.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Replaces end-of-week envelope math and spreadsheets. The owner knows exactly what the shop earned, what each barber is owed, and how clients are paying -- making payouts accurate and bookkeeping straightforward.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Payment Processing &amp; Tracking</h3>
+          <p class="what-it-does">Records every payment with automatic commission calculation based on each barber's rate. Supports 8 payment methods (Cash, Card, Stripe, Zelle, CashApp, Square, Venmo, Other). Automatically splits each transaction into shop cut and barber cut, with separate tip tracking. Each barber's profile stores their personal Zelle and Venmo handles, so the team can receive direct payments and tips through the methods they actually use.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Eliminates manual commission math and end-of-day reconciliation. Every dollar is tracked, split correctly, and attributed to the right barber -- regardless of how the client pays. Barbers get paid through their preferred method (Zelle, Venmo, CashApp) without the owner manually tracking handles.</div>
+        </div>
+
+      </div>
+
+      <div class="replaces-bar">
+        <h4>What This Replaces</h4>
+        <div class="replaces-grid">
+          <div class="replaces-col before">
+            <h5>Before</h5>
+            <ul>
+              <li>Third-party dashboard for appointment management</li>
+              <li>Manual commission tracking with spreadsheets</li>
+              <li>No walk-in queue system</li>
+              <li>No real-time analytics or revenue breakdown</li>
+              <li>Inventory tracked mentally or on paper</li>
+              <li>Service/pricing changes require the platform provider</li>
+            </ul>
+          </div>
+          <div class="replaces-arrow">&#10132;</div>
+          <div class="replaces-col after">
+            <h5>After</h5>
+            <ul>
+              <li>Full appointment board the shop controls</li>
+              <li>Automatic commission splits on every payment</li>
+              <li>Live walk-in queue with status tracking</li>
+              <li>Real-time analytics with charts and comparisons</li>
+              <li>Digital inventory with stock alerts</li>
+              <li>Owner updates services and pricing instantly</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- BARBER TOOLS -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon dark">&#9986;</div>
+        <h2>Barber-Specific Tools</h2>
+      </div>
+      <p class="section-intro">Each barber gets their own personalized dashboard and tools, giving them visibility into their schedule, earnings, and performance without seeing other barbers' data.</p>
+
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Personal Barber Dashboard</h3>
+          <p class="what-it-does">A personalized home screen showing the barber's appointments for today, their daily stats (clients served, revenue generated, tips earned), and recent payment history. Each barber only sees their own data.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Gives barbers ownership of their performance data without exposing the full shop's financials. Motivates accountability and lets barbers track their own earnings without asking the owner.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Barber Calendar</h3>
+          <p class="what-it-does">A day-view calendar overlaid with the barber's set working hours, showing their booked appointments as visual cards. Barbers can see gaps in their schedule and understand their day's flow at a glance.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Barbers know exactly when their next client is, how long they have between appointments, and when their day ends -- without checking a shared calendar or asking the front desk.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Barber Transaction History</h3>
+          <p class="what-it-does">A complete record of each barber's financial transactions including service payments, commissions earned, tips received, booth rent charges, and any manual adjustments. Filterable and sortable.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Full financial transparency for every barber. No more disputes about what was earned or owed -- every transaction is logged, timestamped, and categorized.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Barber Profile Self-Service</h3>
+          <p class="what-it-does">Barbers can update their own profile photo, tagline, and specialties. Changes flow directly to the public website. Photo uploads are validated for format and size (max 5MB).</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Barbers can keep their public profile fresh and personalized without needing the owner or a developer to make website changes for them.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Booth Rental Register &amp; Payment Setup</h3>
+          <p class="what-it-does">Booth-rental barbers get their own register to log transactions independently, plus a self-service backend where they connect their preferred payment method (Zelle, Venmo, CashApp, Square). They process their own payments, record tips, and track their personal revenue separately from the shop's commission structure.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Booth renters operate semi-independently. This tool lets them manage their own payment setup, track their business within Figaro's system, and get paid directly through the method they prefer -- without complicating the shop's commission-based accounting.</div>
+        </div>
+
+      </div>
+
+      <div class="replaces-bar">
+        <h4>What This Replaces</h4>
+        <div class="replaces-grid">
+          <div class="replaces-col before">
+            <h5>Before</h5>
+            <ul>
+              <li>Barbers ask owner for schedule and earnings</li>
+              <li>No personal dashboard or performance data</li>
+              <li>Booth renters track payments in their own apps</li>
+              <li>Profile updates require someone else to make changes</li>
+            </ul>
+          </div>
+          <div class="replaces-arrow">&#10132;</div>
+          <div class="replaces-col after">
+            <h5>After</h5>
+            <ul>
+              <li>Each barber sees their own schedule and stats</li>
+              <li>Personal dashboard with daily performance</li>
+              <li>Booth renters have their own register and payment setup</li>
+              <li>Barbers update their own profile and photo</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECURITY & INFRASTRUCTURE -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon dark">&#128274;</div>
+        <h2>Security, Authentication &amp; Infrastructure</h2>
+      </div>
+      <p class="section-intro">Enterprise-grade security and access controls protecting the shop's data, clients' personal information, and financial records.</p>
+
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Role-Based Access Control</h3>
+          <p class="what-it-does">Four distinct user roles (Owner, Barber, Receptionist, Staff) with granular permissions controlling what each person can see and do. The navigation, available pages, and API access all adapt based on the logged-in user's role.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> The owner sees revenue and can manage everything. Barbers see only their own data. The receptionist handles the front desk. No one accesses more than they should -- protecting sensitive financial data and client information.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Secure Authentication</h3>
+          <p class="what-it-does">Industry-standard authentication with bcrypt password hashing (12 rounds), JWT session tokens, CSRF protection, and rate-limited login attempts (5 per minute per IP) to prevent brute-force attacks.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Protects staff accounts and client data from unauthorized access. Rate limiting prevents automated attacks, and strong encryption ensures passwords can't be recovered even if the database were compromised.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Security Headers &amp; HTTPS</h3>
+          <p class="what-it-does">Full suite of security headers (Content Security Policy, HSTS, X-Frame-Options, X-Content-Type-Options) enforcing encrypted connections, preventing clickjacking, and blocking common web attacks.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Ensures the website meets modern security standards, protects client data in transit, and prevents the site from being embedded or manipulated by malicious third parties.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Data Privacy &amp; Soft Deletes</h3>
+          <p class="what-it-does">Client records use soft-delete (marking as inactive rather than destroying data), preserving referential integrity for appointment and payment history. Rate limiting on public forms (10 submissions per minute) prevents spam and abuse.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Balances data privacy with business needs. A deleted client's past appointments and payments remain intact for accounting, while their profile is removed from active views -- following data protection best practices.</div>
+        </div>
+
+        <div class="feature-card">
+          <span class="phase-badge live">Live</span>
+          <h3>Dedicated Hosting Infrastructure</h3>
+          <p class="what-it-does">The platform runs on a dedicated VPS (Virtual Private Server) with Nginx, PM2 process management, and PostgreSQL -- giving Figaro full control over its data and operations. Hosting costs just a couple hundred dollars per year (paid monthly or annually), plus a standard annual domain renewal -- the same domain cost as the current site. No per-transaction fees, no per-booking commissions, and no platform lock-in.</p>
+          <div class="problem-solved"><strong>Problem solved:</strong> Hosting is a flat, predictable cost of around $175 per year -- plus the same domain renewal the shop already pays. No per-transaction fees, no per-booking commissions, and all data stays on Figaro's own server.</div>
+        </div>
+
+      </div>
+
+      <div class="replaces-bar">
+        <h4>What This Replaces</h4>
+        <div class="replaces-grid">
+          <div class="replaces-col before">
+            <h5>Before</h5>
+            <ul>
+              <li>Third-party platform controls the data and access</li>
+              <li>No role-based permissions for staff</li>
+              <li>Client data locked in a third-party platform</li>
+              <li>Monthly platform fees and per-booking costs</li>
+              <li>No security headers or rate limiting</li>
+            </ul>
+          </div>
+          <div class="replaces-arrow">&#10132;</div>
+          <div class="replaces-col after">
+            <h5>After</h5>
+            <ul>
+              <li>Figaro owns all data on its own server</li>
+              <li>Four roles with granular access control</li>
+              <li>Full client database under Figaro's control</li>
+              <li>Zero recurring platform fees</li>
+              <li>Enterprise-grade security built in</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- FUTURE PHASES -->
+  <div class="future-section">
+    <div class="container">
+      <section class="section">
+        <div class="section-header">
+          <div class="section-icon gold">&#128640;</div>
+          <h2>Future Phases</h2>
+        </div>
+        <p class="section-intro">The platform's database foundation is already built to support these upcoming features. Each phase adds new revenue streams, client engagement tools, and operational capabilities.</p>
+
+        <div class="phase-timeline">
+
+          <div class="phase-block">
+            <h3>Phase 2 -- Client Portal</h3>
+            <p class="phase-desc">Give clients their own login to manage appointments, view history, and complete intake forms -- turning one-time visitors into engaged regulars.</p>
+            <ul class="phase-features">
+              <li>Client authentication with email login and password reset</li>
+              <li>Personal appointment history and upcoming bookings</li>
+              <li>Online rebooking from past appointments</li>
+              <li>Intake form completion and profile management</li>
+            </ul>
+          </div>
+
+          <div class="phase-block">
+            <h3>Phase 3 -- Loyalty Program</h3>
+            <p class="phase-desc">Reward returning clients with a points-based loyalty system that drives repeat visits and increases lifetime client value.</p>
+            <ul class="phase-features">
+              <li>Points earned automatically on every service</li>
+              <li>Tiered membership levels (Bronze, Silver, Gold, Platinum) with escalating perks</li>
+              <li>Rewards catalog -- redeem points for discounts, free services, or products</li>
+              <li>Admin dashboard for managing tiers, rewards, and tracking member activity</li>
+            </ul>
+          </div>
+
+          <div class="phase-block">
+            <h3>Phase 4 -- Memberships &amp; Subscriptions</h3>
+            <p class="phase-desc">Predictable recurring revenue through subscription plans that lock in regular clients and guarantee monthly income.</p>
+            <ul class="phase-features">
+              <li>Configurable membership plans (weekly or monthly billing)</li>
+              <li>Stripe-powered automatic payment collection</li>
+              <li>Included visit tracking and plan enforcement</li>
+              <li>Member management with pause, cancel, and upgrade capabilities</li>
+            </ul>
+          </div>
+
+          <div class="phase-block">
+            <h3>Phase 5 -- Marketing Center &amp; Client Automations</h3>
+            <p class="phase-desc">Targeted outreach tools and automated client engagement -- from thanking clients after a visit to winning back lapsed regulars with personalized offers.</p>
+            <ul class="phase-features">
+              <li>Email campaign builder with reusable templates</li>
+              <li>SMS campaign support for time-sensitive promotions</li>
+              <li>Audience segmentation (by barber, service history, visit frequency)</li>
+              <li>Campaign scheduling with delivery, open, and click tracking</li>
+              <li>Automated "Thank You" message sent after each visit -- keeps the shop top-of-mind and builds loyalty</li>
+              <li>Win-back automation: clients who haven't visited in 2 months automatically receive a "$10 off your next service" offer to bring them back</li>
+            </ul>
+          </div>
+
+          <div class="phase-block">
+            <h3>Phase 6 -- Product Pickup Orders</h3>
+            <p class="phase-desc">Let clients order products online and pick them up at the shop -- turning inventory into an additional revenue stream beyond service appointments.</p>
+            <ul class="phase-features">
+              <li>Online product ordering from the public website with real-time stock availability</li>
+              <li>Order tracking: which client ordered what, order status, and estimated pickup time</li>
+              <li>Dashboard view for staff to see pending pickups and mark orders as collected</li>
+              <li>Notification to the client when their order is ready for pickup</li>
+            </ul>
+          </div>
+
+          <div class="phase-block">
+            <h3>Phase 7 -- House Calls &amp; Wedding Packages</h3>
+            <p class="phase-desc">Expand Figaro's reach beyond the shop walls with premium on-location services -- from house calls to full wedding day grooming packages for the groom and groomsmen.</p>
+            <ul class="phase-features">
+              <li>House call booking with travel fee ($150+) and location details</li>
+              <li>Wedding packages: groom, groomsmen, and wedding party grooming bundles</li>
+              <li>Dedicated "Wedding Services" page on the public site, optimized for "wedding barbers" and "local wedding barbershop" search terms</li>
+              <li>Custom pricing and scheduling for on-location appointments outside regular shop hours</li>
+              <li>Deposit collection at booking for premium on-location services</li>
+            </ul>
+          </div>
+
+          <div class="phase-block">
+            <h3>Stripe Payment Integration</h3>
+            <p class="phase-desc">Accept credit card payments directly through the platform with Stripe, enabling online payment at booking and in-shop card processing.</p>
+            <ul class="phase-features">
+              <li>Online payment at time of booking (deposit or full payment)</li>
+              <li>In-dashboard card processing for walk-in payments</li>
+              <li>Automatic webhook processing for payment confirmations</li>
+              <li>Unified reporting across all payment methods</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- TECHNOLOGY OVERVIEW -->
+  <div class="container">
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon teal">&#9881;</div>
+        <h2>Technology Foundation</h2>
+      </div>
+      <p class="section-intro">Built with modern, industry-standard technologies chosen for reliability, performance, and long-term maintainability.</p>
+
+      <div class="tech-grid">
+        <div class="tech-item">
+          <h4>Framework</h4>
+          <p>Next.js 16 (React)</p>
+        </div>
+        <div class="tech-item">
+          <h4>Language</h4>
+          <p>TypeScript (Strict)</p>
+        </div>
+        <div class="tech-item">
+          <h4>Styling</h4>
+          <p>Tailwind CSS 4</p>
+        </div>
+        <div class="tech-item">
+          <h4>Database</h4>
+          <p>PostgreSQL 17</p>
+        </div>
+        <div class="tech-item">
+          <h4>Authentication</h4>
+          <p>Auth.js v5 (JWT)</p>
+        </div>
+        <div class="tech-item">
+          <h4>Payments</h4>
+          <p>Stripe Connect</p>
+        </div>
+        <div class="tech-item">
+          <h4>Email</h4>
+          <p>Resend</p>
+        </div>
+        <div class="tech-item">
+          <h4>Hosting</h4>
+          <p>Dedicated VPS (Ubuntu)</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="container">
+    <div style="border-top: 1px solid var(--color-light-border); padding: 28px 0 12px; margin-top: 8px;">
+      <p style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-warm-gray); margin-bottom: 10px;">Confidentiality Notice</p>
+      <p style="font-size: 11px; line-height: 1.7; color: var(--color-warm-gray);">This document and all information contained herein are strictly confidential and intended solely for the use of Figaro Barbershop Leucadia and its authorized representatives. This document may not be shared, reproduced, distributed, or disclosed to any third party in whole or in part without the prior written consent of Built by Bas. Unauthorized use, copying, or distribution of this material is prohibited. All intellectual property, designs, technical specifications, and proprietary methodologies described in this document remain the property of Built by Bas.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="doc-footer">
+    <div class="company">Figaro Barbershop Leucadia</div>
+    <p>114 Leucadia Blvd, Encinitas, CA 92024 &nbsp;|&nbsp; (760) 701-2038 &nbsp;|&nbsp; barbershopleucadia@gmail.com</p>
+    <p style="margin-top: 16px; font-size: 11px; color: rgba(255,255,255,0.35);">Platform designed &amp; developed by Built by Bas &nbsp;|&nbsp; March 2026</p>
+  </footer>
+
+  <!-- DOWNLOAD BUTTON -->
+  <button class="download-btn" onclick="downloadPDF()">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 18h16" />
+    </svg>
+    Download PDF
+  </button>
+
+  <script>
+    function downloadPDF() {
+      document.title = 'Figaro-Barbershop-Feature-Breakdown';
+      window.print();
+      setTimeout(function() {
+        document.title = 'Figaro Barbershop - Platform Feature Breakdown';
+      }, 1000);
+    }
+  </script>
+
+</body>
+</html>
