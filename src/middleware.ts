@@ -117,10 +117,16 @@ export function middleware(request: NextRequest) {
   }
 
   // --- CSP with per-request nonce ---
+  // Dev mode needs 'unsafe-eval' for React Fast Refresh / HMR.
+  // Production uses strict nonce-based script-src only.
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const isDev = process.env.NODE_ENV !== "production";
+  const scriptSrc = isDev
+    ? `script-src 'self' 'nonce-${nonce}' 'unsafe-eval' https://js.stripe.com`
+    : `script-src 'self' 'nonce-${nonce}' https://js.stripe.com`;
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://js.stripe.com`,
+    scriptSrc,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.cdninstagram.com https://*.stripe.com",
     "font-src 'self'",
