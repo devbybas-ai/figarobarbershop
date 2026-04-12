@@ -8,20 +8,20 @@ Full-stack barbershop command center for Figaro Barbershop Leucadia. Public-faci
 
 ## Tech Stack (LOCKED)
 
-| Layer           | Choice                   |
-| --------------- | ------------------------ |
-| Language        | TypeScript (strict)      |
-| Framework       | Next.js 16 (App Router)  |
-| Styling         | Tailwind CSS 4           |
-| Animation       | Motion (Framer Motion)   |
-| Database        | PostgreSQL (self-hosted) |
-| ORM             | Prisma 6                 |
-| Auth            | Auth.js (NextAuth v5)    |
-| Testing         | Vitest + Playwright      |
-| Package Manager | pnpm                     |
-| Linting         | ESLint + Prettier        |
-| Version Control | Git + GitHub             |
-| CI/CD           | GitHub Actions           |
+| Layer           | Choice                      |
+| --------------- | --------------------------- |
+| Language        | TypeScript (strict)         |
+| Framework       | Next.js 16.1.7 (App Router) |
+| Styling         | Tailwind CSS 4              |
+| Animation       | Motion (Framer Motion)      |
+| Database        | PostgreSQL (self-hosted)    |
+| ORM             | Prisma 6                    |
+| Auth            | Auth.js (NextAuth v5)       |
+| Testing         | Vitest + Playwright         |
+| Package Manager | pnpm                        |
+| Linting         | ESLint + Prettier           |
+| Version Control | Git + GitHub                |
+| CI/CD           | GitHub Actions              |
 
 ### Additional Tools
 
@@ -55,20 +55,32 @@ prisma/
 e2e/                # Playwright E2E tests
 ```
 
+## Data Protection (Non-Negotiable)
+
+- No deleting, removing, or overwriting ANY file without Bas's explicit permission
+- No running scripts that delete files without a dry-run first
+- No touching files in `~/.claude/projects/`, `.env`, or credentials
+- Always move to backup instead of deleting
+- Always show what will be affected before any bulk operation
+
 ## Standards
 
 This project follows the BuiltByBas Dev Studio Bible (Part II). Key rules:
 
-### Eight Pillars
+### Twelve Pillars
 
-1. Security Minded - Can this be exploited?
-2. Structure - Can someone else pick this up tomorrow?
-3. Performance - Does this respect the user's time and device?
-4. Inclusive - Can everyone use this?
-5. Non-Bias - Does this assume or exclude?
-6. UX Minded - Does this feel intentional and clear?
-7. Universal Design - Does this work for the widest range of people?
-8. R3S - What happens when something fails?
+1. Security -- Can this be exploited?
+2. Reliability -- Does this work every time, under real conditions?
+3. Accessibility -- Can everyone use this?
+4. Modularity -- Can this be changed without breaking everything else?
+5. Readability -- Can a new developer understand this immediately?
+6. Maintainability -- Will this still be easy to work on in two years?
+7. Observability -- Can we see what is happening inside?
+8. Performance -- Does this respect the user's time and device?
+9. Redundancy -- What if one part goes down?
+10. Recovery -- How fast can we get back to working?
+11. Tested & Verified -- Is every feature proven to work?
+12. Documented -- Can someone understand this without asking?
 
 ### Conflict Resolution
 
@@ -138,7 +150,7 @@ All must pass before shipping:
 
 ### During a Session
 
-- Follow the Eight Pillars on every decision
+- Follow the Twelve Pillars on every decision
 - Update HANDOFF.md with progress
 - Log issues in AUDIT.md as found
 
@@ -147,3 +159,4 @@ All must pass before shipping:
 - Update HANDOFF.md with: done, in-progress, next, blockers
 - Run quality gates
 - Update AUDIT.md with any new issues or fixes
+- Write/update `~/.claude/docs/LastStatusReport/figaro.md` -- full granular snapshot

@@ -1,19 +1,23 @@
 # Figaro Command Center - Audit Log
 
-> Last updated: 2026-03-09
+> Last updated: 2026-04-11
 
-## Health Dashboard
+## Health Dashboard (Twelve Pillars)
 
-| Dimension        | Score | Status                                                                       |
-| ---------------- | ----- | ---------------------------------------------------------------------------- |
-| Security         | 9/10  | Strong - auth on all routes, bcrypt, RBAC, HSTS, CSP, rate limiting          |
-| Structure        | 9/10  | Good - clear architecture, book page refactored, error boundaries in place   |
-| Performance      | 8/10  | Good - static pages where possible, build passing, real analytics from DB    |
-| Accessibility    | 8/10  | Good - skip-to-content, semantic HTML, lang attribute, aria labels           |
-| Inclusivity      | 9/10  | Good - inclusive language, no assumptions                                    |
-| UX               | 9/10  | Strong - branded design, real photos, booking error feedback                 |
-| Universal Design | 8/10  | Good - keyboard accessible foundations, viewport configured                  |
-| R3S              | 9/10  | Strong - error.tsx, loading.tsx, not-found.tsx, API try/catch everywhere     |
+| Pillar            | Score | Status                                                                                  |
+| ----------------- | ----- | --------------------------------------------------------------------------------------- |
+| Security          | 8/10  | Auth on all routes, bcrypt, RBAC, HSTS, CSP, rate limiting. Next.js + Vite vulns open.  |
+| Reliability       | 9/10  | Error boundaries, API try/catch, idempotent seed, soft deletes                          |
+| Accessibility     | 8/10  | Skip-to-content, semantic HTML, lang attr, aria labels, viewport configured             |
+| Modularity        | 9/10  | Clean architecture, book page refactored into 8 step components                         |
+| Readability       | 9/10  | TypeScript strict, consistent naming, clear file structure                              |
+| Maintainability   | 8/10  | Good patterns but test coverage is minimal (6 unit tests)                               |
+| Observability     | 7/10  | Console logging only, no structured logging or monitoring                               |
+| Performance       | 8/10  | Static pages where possible, middleware skips static assets                             |
+| Redundancy        | 7/10  | Single instance, no failover, no automated backups                                      |
+| Recovery          | 7/10  | VPS deployed, no recovery runbook, no automated rollback                                |
+| Tested & Verified | 5/10  | Only 6 unit tests. No component, API, or integration tests.                            |
+| Documented        | 9/10  | Full governance files, project map, SEO config, policy pages                            |
 
 ## Issues Tracker
 
@@ -50,6 +54,16 @@
 | 037 | Medium   | Fixed  | Book page was 902-line monolith (hard to maintain)                          | 2026-03-09 | 2026-03-09 |
 | 038 | Low      | Fixed  | Seed failed on re-run due to payment FK constraint on appointments          | 2026-03-09 | 2026-03-09 |
 | 039 | Low      | Fixed  | react-hooks/set-state-in-effect lint errors in analytics + appointments     | 2026-03-09 | 2026-03-09 |
+| 040 | Medium   | Fixed  | Contact info wrong: phone, email, hours incorrect across 6 files            | 2026-03-15 | 2026-03-15 |
+| 041 | High     | Fixed  | VPS builds failing: git pull as root changed file ownership                 | 2026-03-18 | 2026-03-18 |
+| 042 | High     | Fixed  | NEXTAUTH_URL pointed to raw IP instead of domain (auth login spinning)      | 2026-03-18 | 2026-03-18 |
+| 043 | Medium   | Fixed  | Prisma migration baseline missing on VPS (schema drift)                     | 2026-03-18 | 2026-03-18 |
+| 044 | High     | Open   | Next.js 16.1.7 DoS vulnerability (Server Components) -- patch in 16.2.3+   | 2026-04-11 | --         |
+| 045 | High     | Open   | Vite 7.x `server.fs.deny` bypass (transitive via unpinned Vitest)           | 2026-04-11 | --         |
+| 046 | High     | Open   | Vite 7.x arbitrary file read via WebSocket (transitive via unpinned Vitest) | 2026-04-11 | --         |
+| 047 | Moderate | Open   | Vite 7.x path traversal in optimized deps .map handling (transitive)        | 2026-04-11 | --         |
+| 048 | Medium   | Open   | Vitest not pinned -- ^4.1.2 pulls Vite 7.x (needs Node 22, we run Node 20) | 2026-04-11 | --         |
+| 049 | Medium   | Open   | SECURITY-AUDIT.md missing -- required for all live projects                 | 2026-04-11 | --         |
 
 ## Tech Debt Register
 
@@ -62,6 +76,8 @@
 | TD-006 | ~~Move barber data maps into DB fields~~ **RESOLVED**        | ~~Med~~  | 2026-03-08 |
 | TD-008 | ~~Add rate limiting on login/form endpoints~~ **RESOLVED**   | ~~Med~~  | 2026-03-08 |
 | TD-009 | Migrate middleware to Next.js 16 proxy convention            | Low      | 2026-03-08 |
+| TD-010 | Expand test coverage (components, API routes, integration)   | Medium   | 2026-03-21 |
+| TD-011 | Homepage fully client-rendered (no SSR for SEO body content) | Low      | 2026-03-08 |
 
 ## Security Posture
 
@@ -88,3 +104,7 @@
 | 2026-03-06 | Session 4 | Real shop photos, homepage streamlined, branding updated, barber data corrected.                              |
 | 2026-03-08 | Session 7 | Full-scale audit. 18 issues fixed across security, bugs, UX, structure, performance, docs. All gates passing. |
 | 2026-03-09 | Session 11 | Backend completion. Owner access, inventory CRUD, rate limiting, real analytics, DB fields, book refactor. 4 TD items resolved. All 5 gates passing. |
+| 2026-03-15 | Session 12 | Schema foundation (11 enums, 12 models). Barber business units (commission vs booth-rental). 4 new APIs, 5 new dashboard pages. Role-based sidebar. Contact info corrected. |
+| 2026-03-18 | Session 13 | Platform details page. VPS permission fix (chown). NEXTAUTH_URL corrected. Prisma migration baseline. |
+| 2026-03-21 | Session 14 | Project map tour. Verified and filled figaro.md project map. Updated stale governance files. |
+| 2026-04-11 | Session 15 | Governance audit. Twelve Pillars applied. 4 dep vulns found (1 Next.js high, 3 Vite via unpinned Vitest). SECURITY-AUDIT.md flagged missing. |

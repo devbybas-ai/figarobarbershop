@@ -1,7 +1,7 @@
 # Figaro Command Center - Session Handoff
 
-> Last updated: 2026-03-15
-> Session: 12 (complete)
+> Last updated: 2026-04-11
+> Session: 15 (governance audit)
 
 ## Current State
 
@@ -326,20 +326,67 @@
   - `/dashboard/revenue` — owner-only revenue report (gross/shop/commission/tips totals, booth rent tracking, payment method breakdown, per-barber table)
 - All quality gates passing: type-check (0), lint (0), test (6/6)
 
+### Done (Session 13)
+
+- **Platform Details page**: Professional client-facing feature breakdown at `/platform-details-2026.html`
+  - Branded for Figaro with logo, Encinitas tagline, gold/black/teal/cream design
+  - Complete feature inventory: Public Website (8), Admin Dashboard (10), Barber Tools (5), Security (5)
+  - "What This Replaces" before/after comparison bars on every section
+  - 7 Future Phases: Client Portal, Loyalty, Memberships, Marketing + Automations, Product Pickup Orders, House Calls & Wedding Packages, Stripe Integration
+  - Print-optimized CSS for clean PDF download (Download PDF button)
+  - Confidentiality notice and Built by Bas developer credit
+  - Rick's feature requests incorporated: Zelle/Venmo for team, product pickup orders, thank-you automations, win-back campaigns ($10 off after 2 months), house calls with travel fee ($150+), wedding packages, SEO keywords (Encinitas barber, wedding barbers)
+- **VPS permission fix**: Root cause of production build failures identified -- `git pull` as root changed file ownership, breaking builds for service users
+  - Fixed with `chown -R <user>:<user>` across all 7 project directories
+  - Updated global VPS docs with critical warning about deploy-as-service-user
+- **NEXTAUTH_URL corrected**: Changed from `http://72.62.200.30:3004` to `https://figaro.builtbybas.com` on VPS -- was causing auth login to spin forever
+- **Prisma migration baseline**: VPS database baselined with `prisma migrate resolve --applied` + `prisma db push` to sync Session 12 schema changes
+- **Session-start prompt created**: `~/.claude/docs/session-start-prompt.md` -- comprehensive checklist for all future sessions ensuring knowledge base is read before any work begins
+- **Memory updates**: Live URL updated to `figaro.builtbybas.com`, deploy verification rule saved, emoji rule clarified, VPS specs documented
+- All quality gates passing locally: type-check (0), lint (0), build (45 pages, 0 errors)
+
+### Done (Session 14)
+
+- **Project map verified and filled**: `~/.claude/docs/projectmap/figaro.md` -- all 7 TODO markers replaced with verified codebase data (dependencies, env vars, 27 API routes, 24 DB models, integrations, file structure, test coverage, decisions)
+- **ProjectHealth.md rewritten**: Was stale from session 1 era, now reflects session 14 state with current scores, metrics, tech debt, and production readiness checklist
+- **AUDIT.md updated**: Added issues 040-043 (sessions 12-13), tech debt TD-010/TD-011, audit history entries for sessions 12-14
+- **Project registry updated**: Figaro entry expanded with GitHub, SSH alias, brand, scope, governance, correct local path
+- **Session-end KB sync process created**: New checklist added to session-start-prompt.md ensuring all governance and knowledge base files are scanned and updated at session end
+
+### Done (Post-Session 14 -- security patches, no dedicated session)
+
+- **Next.js security patch**: Updated 16.1.6 -> 16.1.7 (commit `2ae0ff7`)
+- **17 dependency vulnerabilities patched**: flatted, undici, picomatch, happy-dom, brace-expansion transitive deps (commit `5b11154`)
+- **Dependabot enabled**: Automated dependency security monitoring on GitHub (commit `d70a842`)
+
+### Done (Session 15 -- Governance Audit)
+
+- **CLAUDE.md updated**: "Eight Pillars" -> "Twelve Pillars", Data Protection section added, LastStatusReport in session end protocol, Next.js version corrected to 16.1.7
+- **AUDIT.md updated**: Health Dashboard rewritten with Twelve Pillars scoring, 4 new vulnerability issues added (044-047), date updated to 2026-04-11
+- **ProjectHealth.md updated**: Twelve Pillars dimensions, current vulnerability status, accurate codebase metrics
+- **HANDOFF.md updated**: Current state through Session 15, post-Session 14 security patches documented
+- **Project map updated**: Dependency versions synced with actual package.json, last verified date updated
+- **MEMORY.md updated**: Session 11 gap filled, session 15 added, line count verified under 200
+
 ### Blockers
 
-- None
+- **Next.js 16.1.7 has a high-severity DoS vulnerability** (patched in 16.2.3+) -- needs upgrade
+- **Vitest unpinned** -- `package.json` has `^4.1.2` but should be pinned to `4.0.18` (Node 20 compat). This pulled in Vite 7.x transitively, causing 3 vulnerabilities (2 high, 1 moderate). Needs rollback.
+- **SECURITY-AUDIT.md missing** -- required for all live projects per portfolio standard
 
-### Next Steps (Session 13)
+### Next Steps (Session 16)
 
-1. Update seed data to set barber types (commission vs booth-rental) and remove fake clients
-2. Client Portal (Phase 2): client auth, portal pages, booking within portal
-3. Loyalty Program (Phase 3): points engine, tiers, rewards, redemption
-4. Memberships & Subscriptions (Phase 4): plans, Stripe subscriptions, visit tracking
-5. Marketing Center (Phase 5): email campaigns, templates, audience engine, tracking
-6. Review 2 borderline images flagged in Session 8
-7. Stripe frontend completion (payment forms)
-8. E2E tests for key flows
+1. **Fix Vitest pinning** -- pin back to `"4.0.18"`, pin Vite to `"6.3.5"`, run `pnpm install` to restore Node 20 compat
+2. **Upgrade Next.js** -- 16.1.7 -> 16.2.3+ to patch DoS vulnerability
+3. **Create SECURITY-AUDIT.md** -- penetration test checklist per portfolio standard
+4. Update seed data to set barber types (commission vs booth-rental)
+5. Client Portal (Phase 2): client auth, portal pages, booking within portal
+6. Loyalty Program (Phase 3): points engine, tiers, rewards, redemption
+7. Memberships & Subscriptions (Phase 4): plans, Stripe subscriptions, visit tracking
+8. Marketing Center (Phase 5): email campaigns, templates, audience engine, tracking
+9. Review 2 borderline images flagged in Session 8
+10. Stripe frontend completion (payment forms)
+11. E2E tests for key flows -- expand from 6 unit tests
 
 ## Decisions Made
 
@@ -384,3 +431,6 @@
 | 10      | 2026-03-09 | Backend review + major feature build. Register/POS page, services CRUD, My Profile fix + photo upload, intake kiosk mode, policy pages (privacy/terms/cancellation), soft-delete re-registration fix, test data cleanup. Type-check clean.                           |
 | 11      | 2026-03-09 | Backend completion. Owner master access, inventory CRUD, rate limiting, real analytics, barber DB fields, book page refactor. 5 tech debt items resolved (TD-004/005/006/008). All 5 quality gates passing.                                                           |
 | 12      | 2026-03-15 | Feature expansion Phase 1. Schema foundation (11 enums, 12 models). Barber business units (commission vs booth-rental). Expanded payments (tips, 8 methods, commission calc). 4 new APIs + 5 new dashboard pages. Role-based sidebar. Contact info corrected. All quality gates passing. |
+| 13      | 2026-03-18 | Platform details page for client budgeting. VPS permission fix (chown). NEXTAUTH_URL corrected. Prisma migration baseline. Session-start prompt created. Rick's feature requests added to roadmap. |
+| 14      | 2026-03-21 | Project map tour. Verified and filled figaro.md project map (all 7 sections). Updated stale ProjectHealth.md, AUDIT.md, project-registry. Created session-end KB sync process. |
+| 15      | 2026-04-11 | Governance audit. All files updated to Twelve Pillars + Data Protection. 4 vulnerabilities found (1 Next.js, 3 Vite via unpinned Vitest). Vitest pinning drift flagged. SECURITY-AUDIT.md identified as missing. |
