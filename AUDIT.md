@@ -58,19 +58,24 @@
 | 041 | High     | Fixed  | VPS builds failing: git pull as root changed file ownership                 | 2026-03-18 | 2026-03-18 |
 | 042 | High     | Fixed  | NEXTAUTH_URL pointed to raw IP instead of domain (auth login spinning)      | 2026-03-18 | 2026-03-18 |
 | 043 | Medium   | Fixed  | Prisma migration baseline missing on VPS (schema drift)                     | 2026-03-18 | 2026-03-18 |
-| 044 | High     | Open   | Next.js 16.1.7 DoS vulnerability (Server Components) -- patch in 16.2.3+    | 2026-04-11 | --         |
-| 045 | High     | Open   | Vite 7.x `server.fs.deny` bypass (transitive via unpinned Vitest)           | 2026-04-11 | --         |
-| 046 | High     | Open   | Vite 7.x arbitrary file read via WebSocket (transitive via unpinned Vitest) | 2026-04-11 | --         |
-| 047 | Moderate | Open   | Vite 7.x path traversal in optimized deps .map handling (transitive)        | 2026-04-11 | --         |
-| 048 | Medium   | Open   | Vitest not pinned -- ^4.1.2 pulls Vite 7.x (needs Node 22, we run Node 20)  | 2026-04-11 | --         |
-| 049 | Medium   | Open   | SECURITY-AUDIT.md missing -- required for all live projects                 | 2026-04-11 | --         |
+| 044 | High     | Fixed  | Next.js 16.1.7 DoS vulnerability (Server Components) -- upgraded to 16.2.3  | 2026-04-11 | 2026-04-11 |
+| 045 | High     | Fixed  | Vite 7.x `server.fs.deny` bypass -- downgraded to Vite 6.4.2               | 2026-04-11 | 2026-04-11 |
+| 046 | High     | Fixed  | Vite 7.x arbitrary file read via WebSocket -- downgraded to Vite 6.4.2      | 2026-04-11 | 2026-04-11 |
+| 047 | Moderate | Fixed  | Vite 7.x path traversal in optimized deps -- downgraded to Vite 6.4.2       | 2026-04-11 | 2026-04-11 |
+| 048 | Medium   | Fixed  | Vitest pinned to 4.0.18, Vite pinned to 6.4.2 (Node 20 compatible)          | 2026-04-11 | 2026-04-11 |
+| 049 | Medium   | Fixed  | SECURITY-AUDIT.md created -- full 20-section penetration test                | 2026-04-11 | 2026-04-11 |
+| 050 | High     | Fixed  | DEFAULT_BARBER_PASSWORD had hardcoded "changeme123!" fallback                | 2026-04-11 | 2026-04-11 |
+| 051 | High     | Fixed  | CSP used unsafe-inline for script-src -- now nonce-based via middleware       | 2026-04-11 | 2026-04-11 |
+| 052 | Medium   | Fixed  | Instagram access token exposed in URL query string                           | 2026-04-11 | 2026-04-11 |
+| 053 | Medium   | Fixed  | Appointment booking had no conflict check (race condition)                    | 2026-04-11 | 2026-04-11 |
+| 054 | Low      | Fixed  | Clients and appointments endpoints returned unbounded results                | 2026-04-11 | 2026-04-11 |
 
 ## Tech Debt Register
 
 | ID     | Description                                                  | Priority | Added      |
 | ------ | ------------------------------------------------------------ | -------- | ---------- |
 | TD-001 | Upgrade to Prisma 7 when Node 22+ is available               | Low      | 2026-03-06 |
-| TD-003 | Add CSP nonce-based script loading (replace unsafe-inline)   | Medium   | 2026-03-06 |
+| TD-003 | ~~CSP nonce-based script loading~~ **RESOLVED Session 16**   | ~~Med~~  | 2026-03-06 |
 | TD-004 | ~~Analytics page uses sample data~~ **RESOLVED Session 11**  | ~~Med~~  | 2026-03-06 |
 | TD-005 | ~~Refactor book/page.tsx into step components~~ **RESOLVED** | ~~Med~~  | 2026-03-08 |
 | TD-006 | ~~Move barber data maps into DB fields~~ **RESOLVED**        | ~~Med~~  | 2026-03-08 |
@@ -84,7 +89,7 @@
 | Check                       | Status                                   |
 | --------------------------- | ---------------------------------------- |
 | Security headers configured | Yes (HSTS with preload)                  |
-| CSP configured              | Yes (Tier B - unsafe-inline for styles)  |
+| CSP configured              | Yes (nonce-based scripts, unsafe-inline styles only) |
 | CSRF protection             | Yes (Origin validation)                  |
 | Auth middleware             | Yes (dashboard UI routes protected)      |
 | API route auth              | Yes (all sensitive routes guarded)       |
@@ -108,3 +113,4 @@
 | 2026-03-18 | Session 13 | Platform details page. VPS permission fix (chown). NEXTAUTH_URL corrected. Prisma migration baseline.                                                                       |
 | 2026-03-21 | Session 14 | Project map tour. Verified and filled figaro.md project map. Updated stale governance files.                                                                                |
 | 2026-04-11 | Session 15 | Governance audit. Twelve Pillars applied. 4 dep vulns found (1 Next.js high, 3 Vite via unpinned Vitest). SECURITY-AUDIT.md flagged missing.                                |
+| 2026-04-11 | Session 16 | Security remediation. All dep vulns patched (0 remaining). SECURITY-AUDIT.md created (20/20, B+). 5 findings fixed. TD-003 resolved. All quality gates passing.              |

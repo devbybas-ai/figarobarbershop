@@ -1,7 +1,7 @@
 # Figaro Command Center - Session Handoff
 
 > Last updated: 2026-04-11
-> Session: 15 (governance audit)
+> Session: 16 (security remediation)
 
 ## Current State
 
@@ -368,25 +368,39 @@
 - **Project map updated**: Dependency versions synced with actual package.json, last verified date updated
 - **MEMORY.md updated**: Session 11 gap filled, session 15 added, line count verified under 200
 
+### Done (Session 16 -- Security Remediation)
+
+- **All dependency vulnerabilities patched** (0 remaining):
+  - Next.js 16.1.7 -> 16.2.3 (DoS in Server Components patched)
+  - Vite 7.3.1 -> 6.4.2 (5 vulns patched, stays Node 20 compatible)
+  - Vitest ^4.1.2 -> 4.0.18 pinned (prevents Vite 7.x pull)
+  - @vitejs/plugin-react 5.2.0 -> 4.4.1 (Vite 6 compatible)
+  - eslint-config-next 16.1.6 -> 16.2.3
+- **SECURITY-AUDIT.md created**: Full 20-section penetration test (183 items, 96 pass, 24 partial, 7 fail, 56 N/A). Rating: B+
+- **5 security findings remediated**:
+  1. DEFAULT_BARBER_PASSWORD: removed hardcoded "changeme123!" fallback, env var now required
+  2. CSP: nonce-based script-src via middleware (removed unsafe-inline for scripts). style-src keeps unsafe-inline for Motion compatibility (accepted risk, documented)
+  3. Instagram API: access token moved from URL query string to Authorization Bearer header
+  4. Appointment booking: transaction-based conflict check prevents double-booking race condition (returns 409)
+  5. Pagination: clients endpoint paginated (page/limit params, max 100), appointments GET capped at 200
+- **Platform Tracking Matrix updated**: Figaro marked 20/20 sections complete
+
 ### Blockers
 
-- **Next.js 16.1.7 has a high-severity DoS vulnerability** (patched in 16.2.3+) -- needs upgrade
-- **Vitest unpinned** -- `package.json` has `^4.1.2` but should be pinned to `4.0.18` (Node 20 compat). This pulled in Vite 7.x transitively, causing 3 vulnerabilities (2 high, 1 moderate). Needs rollback.
-- **SECURITY-AUDIT.md missing** -- required for all live projects per portfolio standard
+- None
 
-### Next Steps (Session 16)
+### Next Steps (Session 17)
 
-1. **Fix Vitest pinning** -- pin back to `"4.0.18"`, pin Vite to `"6.3.5"`, run `pnpm install` to restore Node 20 compat
-2. **Upgrade Next.js** -- 16.1.7 -> 16.2.3+ to patch DoS vulnerability
-3. **Create SECURITY-AUDIT.md** -- penetration test checklist per portfolio standard
-4. Update seed data to set barber types (commission vs booth-rental)
-5. Client Portal (Phase 2): client auth, portal pages, booking within portal
-6. Loyalty Program (Phase 3): points engine, tiers, rewards, redemption
-7. Memberships & Subscriptions (Phase 4): plans, Stripe subscriptions, visit tracking
-8. Marketing Center (Phase 5): email campaigns, templates, audience engine, tracking
-9. Review 2 borderline images flagged in Session 8
-10. Stripe frontend completion (payment forms)
-11. E2E tests for key flows -- expand from 6 unit tests
+1. VPS infrastructure hardening (automated backups, structured logging)
+2. Deploy Session 16 changes to VPS (after dev verification)
+3. Update seed data to set barber types (commission vs booth-rental)
+4. Client Portal (Phase 2): client auth, portal pages, booking within portal
+5. Loyalty Program (Phase 3): points engine, tiers, rewards, redemption
+6. Memberships & Subscriptions (Phase 4): plans, Stripe subscriptions, visit tracking
+7. Marketing Center (Phase 5): email campaigns, templates, audience engine, tracking
+8. Review 2 borderline images flagged in Session 8
+9. Stripe frontend completion (payment forms)
+10. E2E tests for key flows -- expand from 6 unit tests
 
 ## Decisions Made
 
@@ -434,3 +448,4 @@
 | 13      | 2026-03-18 | Platform details page for client budgeting. VPS permission fix (chown). NEXTAUTH_URL corrected. Prisma migration baseline. Session-start prompt created. Rick's feature requests added to roadmap.                                                                                       |
 | 14      | 2026-03-21 | Project map tour. Verified and filled figaro.md project map (all 7 sections). Updated stale ProjectHealth.md, AUDIT.md, project-registry. Created session-end KB sync process.                                                                                                           |
 | 15      | 2026-04-11 | Governance audit. All files updated to Twelve Pillars + Data Protection. 4 vulnerabilities found (1 Next.js, 3 Vite via unpinned Vitest). Vitest pinning drift flagged. SECURITY-AUDIT.md identified as missing.                                                                         |
+| 16      | 2026-04-11 | Security remediation. All dep vulns patched (0 remaining). SECURITY-AUDIT.md created (20/20 sections, B+ rating). 5 findings fixed: default password, CSP nonce, Instagram token, booking race condition, pagination. All quality gates passing.                                          |

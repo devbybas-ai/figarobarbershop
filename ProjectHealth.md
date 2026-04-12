@@ -1,16 +1,16 @@
 # Figaro Command Center - Project Health
 
-> Last updated: 2026-04-11 (Session 15 -- governance audit)
+> Last updated: 2026-04-11 (Session 16 -- security remediation)
 
-## Overall Grade: B+
+## Overall Grade: A-
 
-Mature full-stack barbershop platform with 14 sessions of work. Strong auth, role-based access, real data, polished public site, comprehensive admin dashboard. Schema foundation laid for 5 future feature phases. Test coverage and open vulnerabilities are the main gaps.
+Mature full-stack barbershop platform with 16 sessions of work. Strong auth, role-based access, real data, polished public site, comprehensive admin dashboard. Schema foundation laid for 5 future feature phases. All dependency vulnerabilities patched, nonce-based CSP, full penetration test complete (B+ rating). Test coverage remains the main gap.
 
 ## Twelve Pillars
 
 | Pillar            | Score | Notes                                                                    |
 | ----------------- | ----- | ------------------------------------------------------------------------ |
-| Security          | 8/10  | Auth on all routes, bcrypt, RBAC, HSTS, CSP, rate limiting. 4 dep vulns. |
+| Security          | 9/10  | Auth on all routes, bcrypt, RBAC, HSTS, nonce CSP, rate limiting. 0 dep vulns. |
 | Reliability       | 9/10  | Error boundaries, API try/catch, idempotent seed, soft deletes           |
 | Accessibility     | 8/10  | Skip-to-content, semantic HTML, lang attr, aria labels, viewport config  |
 | Modularity        | 9/10  | Clean architecture, book page refactored into 8 step components          |
@@ -37,29 +37,23 @@ Mature full-stack barbershop platform with 14 sessions of work. Strong auth, rol
 | Database models   | 24                                               |
 | Dashboard pages   | 14                                               |
 | Public pages      | 9                                                |
-| Dep vulns         | 4 (1 Next.js high, 2 Vite high, 1 Vite moderate) |
+| Dep vulns         | 0                                                |
 
 ## Open Tech Debt
 
 | ID     | Description                                                | Priority |
 | ------ | ---------------------------------------------------------- | -------- |
 | TD-001 | Upgrade to Prisma 7 when Node 22+ available                | Low      |
-| TD-003 | CSP nonce-based script loading (replace unsafe-inline)     | Medium   |
+| TD-003 | ~~CSP nonce-based script loading~~ **RESOLVED Session 16** | ~~Med~~  |
 | TD-009 | Migrate middleware to Next.js 16 proxy convention          | Low      |
 | TD-010 | Expand test coverage (components, API routes, integration) | Medium   |
 | TD-011 | Homepage is fully client-rendered (no SSR for SEO body)    | Low      |
 
 ## Open Issues
 
-| ID  | Severity | Description                                                     |
-| --- | -------- | --------------------------------------------------------------- |
-| 027 | Info     | Homepage fully client-rendered (no SSR for SEO body)            |
-| 044 | High     | Next.js 16.1.7 DoS vulnerability -- patch in 16.2.3+            |
-| 045 | High     | Vite 7.x server.fs.deny bypass (transitive via unpinned Vitest) |
-| 046 | High     | Vite 7.x arbitrary file read via WebSocket                      |
-| 047 | Moderate | Vite 7.x path traversal in optimized deps .map handling         |
-| 048 | Medium   | Vitest not pinned -- ^4.1.2 pulls Vite 7.x (needs Node 22)      |
-| 049 | Medium   | SECURITY-AUDIT.md missing                                       |
+| ID  | Severity | Description                                          |
+| --- | -------- | ---------------------------------------------------- |
+| 027 | Info     | Homepage fully client-rendered (no SSR for SEO body) |
 
 ## Production Readiness Checklist
 
@@ -73,9 +67,9 @@ Mature full-stack barbershop platform with 14 sessions of work. Strong auth, rol
 | 6   | Lighthouse Performance 90+            | Pending                           |
 | 7   | Lighthouse Accessibility 100          | Pending                           |
 | 8   | Lighthouse SEO 90+                    | Pending                           |
-| 9   | 0 critical dependency vulnerabilities | FAIL (4 vulns open)               |
+| 9   | 0 critical dependency vulnerabilities | Pass (0 vulns)                    |
 | 10  | Static fallbacks for dynamic content  | Pending                           |
 | 11  | Recovery runbook documented           | Pending                           |
 | 12  | SSL/TLS configured                    | Pass (VPS)                        |
 | 13  | Automated backups configured          | Pending                           |
-| 14  | SECURITY-AUDIT.md complete            | MISSING                           |
+| 14  | SECURITY-AUDIT.md complete            | Pass (20/20 sections, B+)         |

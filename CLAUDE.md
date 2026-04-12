@@ -11,7 +11,7 @@ Full-stack barbershop command center for Figaro Barbershop Leucadia. Public-faci
 | Layer           | Choice                      |
 | --------------- | --------------------------- |
 | Language        | TypeScript (strict)         |
-| Framework       | Next.js 16.1.7 (App Router) |
+| Framework       | Next.js 16.2.3 (App Router) |
 | Styling         | Tailwind CSS 4              |
 | Animation       | Motion (Framer Motion)      |
 | Database        | PostgreSQL (self-hosted)    |
