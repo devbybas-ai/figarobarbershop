@@ -1,12 +1,24 @@
 # Figaro Command Center - Audit Log
 
-> Last updated: 2026-04-11
+> Last updated: 2026-04-12
+
+## Production State (IMPORTANT)
+
+**GitHub `main` and VPS diverged after failed Session 16 deploy:**
+
+- **GitHub `main` HEAD**: `f740a7f` (Session 16 + middleware fix, all security patches)
+- **VPS HEAD**: `c8adb7a` (Session 13 state, pre-Session-16)
+- **Gap**: 9 commits. VPS is missing all Session 16 security work.
+- **VPS .env has**: `DEFAULT_BARBER_PASSWORD=Barber!2026!@` added 2026-04-12 (harmless on old code)
+- **Why the gap**: Session 16 code crashed in production (crash loop, 85 restarts). Rolled back to stabilize. Root cause not yet identified.
+
+Do not `git push` to deploy without first understanding and fixing the crash.
 
 ## Health Dashboard (Twelve Pillars)
 
 | Pillar            | Score | Status                                                                                 |
 | ----------------- | ----- | -------------------------------------------------------------------------------------- |
-| Security          | 8/10  | Auth on all routes, bcrypt, RBAC, HSTS, CSP, rate limiting. Next.js + Vite vulns open. |
+| Security          | 7/10  | **Prod on old code** (Session 13) after failed deploy. Next.js DoS + 3 Vite vulns live. GitHub is patched. |
 | Reliability       | 9/10  | Error boundaries, API try/catch, idempotent seed, soft deletes                         |
 | Accessibility     | 8/10  | Skip-to-content, semantic HTML, lang attr, aria labels, viewport configured            |
 | Modularity        | 9/10  | Clean architecture, book page refactored into 8 step components                        |
@@ -69,6 +81,9 @@
 | 052 | Medium   | Fixed  | Instagram access token exposed in URL query string                           | 2026-04-11 | 2026-04-11 |
 | 053 | Medium   | Fixed  | Appointment booking had no conflict check (race condition)                    | 2026-04-11 | 2026-04-11 |
 | 054 | Low      | Fixed  | Clients and appointments endpoints returned unbounded results                | 2026-04-11 | 2026-04-11 |
+| 055 | Critical | Open   | Session 16 code crashes on VPS (Node 22 / Next.js 16.2.3) -- root cause unidentified. Rolled back to c8adb7a. | 2026-04-12 | --         |
+| 056 | Medium   | Open   | Middleware CSP pattern deviation from Next.js docs -- fixed in f740a7f but UNTESTED on VPS                    | 2026-04-12 | --         |
+| 057 | Low      | Open   | PM2 ecosystem.config.cjs does not explicitly set NODE_ENV=production                                           | 2026-04-12 | --         |
 
 ## Tech Debt Register
 
@@ -114,3 +129,4 @@
 | 2026-03-21 | Session 14 | Project map tour. Verified and filled figaro.md project map. Updated stale governance files.                                                                                |
 | 2026-04-11 | Session 15 | Governance audit. Twelve Pillars applied. 4 dep vulns found (1 Next.js high, 3 Vite via unpinned Vitest). SECURITY-AUDIT.md flagged missing.                                |
 | 2026-04-11 | Session 16 | Security remediation. All dep vulns patched (0 remaining). SECURITY-AUDIT.md created (20/20, B+). 5 findings fixed. TD-003 resolved. All quality gates passing.              |
+| 2026-04-12 | Session 16b | VPS deploy FAILED -- crash loop ~85 restarts, site down 5-10 min, rolled back to c8adb7a. Session 16 code in GitHub (main) but NOT deployed. Root cause unidentified. |

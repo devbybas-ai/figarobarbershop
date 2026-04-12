@@ -1,10 +1,12 @@
 # Figaro Command Center - Project Health
 
-> Last updated: 2026-04-11 (Session 16 -- security remediation)
+> Last updated: 2026-04-12 (Session 16b -- failed deploy, rolled back)
 
-## Overall Grade: A-
+## Overall Grade: B (GitHub main: A-, VPS production: B)
 
-Mature full-stack barbershop platform with 16 sessions of work. Strong auth, role-based access, real data, polished public site, comprehensive admin dashboard. Schema foundation laid for 5 future feature phases. All dependency vulnerabilities patched, nonce-based CSP, full penetration test complete (A- rating). Test coverage remains the main gap.
+**GitHub main branch**: 16 sessions of work. Strong auth, role-based access, real data, polished public site, comprehensive admin dashboard. All dep vulns patched, nonce-based CSP, full penetration test complete. Quality is A-.
+
+**VPS production**: rolled back to Session 13 state after Session 16 deploy crashed. Old vulnerable dep versions live (Next.js 16.1.7 DoS + 3 Vite vulns). Root cause of Session 16 VPS crash unidentified. Next session priority: debug before redeploy.
 
 ## Twelve Pillars
 
@@ -67,7 +69,7 @@ Mature full-stack barbershop platform with 16 sessions of work. Strong auth, rol
 | 6   | Lighthouse Performance 90+            | Pending                           |
 | 7   | Lighthouse Accessibility 100          | Pending                           |
 | 8   | Lighthouse SEO 90+                    | Pending                           |
-| 9   | 0 critical dependency vulnerabilities | Pass (0 vulns)                    |
+| 9   | 0 critical dependency vulnerabilities | Pass in repo / FAIL on VPS (prod rolled back to Session 13) |
 | 10  | Static fallbacks for dynamic content  | Pending                           |
 | 11  | Recovery runbook documented           | Pending                           |
 | 12  | SSL/TLS configured                    | Pass (VPS)                        |

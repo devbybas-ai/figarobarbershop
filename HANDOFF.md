@@ -1,7 +1,7 @@
 # Figaro Command Center - Session Handoff
 
-> Last updated: 2026-04-11
-> Session: 16 (security remediation)
+> Last updated: 2026-04-12
+> Session: 16 (security remediation + failed deploy + rollback)
 
 ## Current State
 
@@ -385,22 +385,62 @@
   5. Pagination: clients endpoint paginated (page/limit params, max 100), appointments GET capped at 200
 - **Platform Tracking Matrix updated**: Figaro marked 20/20 sections complete
 
+### Done (Session 16 -- Part 2: VPS Deploy Attempt + Rollback)
+
+- **Attempted deploy to VPS** -- failed with crash loop. Production site went down for approximately 5-10 minutes before rollback.
+- **Added `DEFAULT_BARBER_PASSWORD=Barber!2026!@`** to VPS `.env` (required by Session 16 code -- previous version had hardcoded fallback "changeme123!")
+- **VPS rolled back** to commit `c8adb7a` (Session 13 state, pre-Session-16). Production stable again, confirmed reachable.
+- **Attempted middleware fix** (commit `f740a7f`): canonical Next.js CSP nonce pattern with proper `request: { headers: requestHeaders }` wrapping. NOT VERIFIED on VPS -- local pnpm start worked but crash is VPS-specific.
+- **Root cause NOT definitively identified.** Crash manifested as `TypeError: Cannot read properties of undefined (reading 'map')` at "ignore-listed frames" (Next.js internals). 85 restarts in ~90 seconds. Process became "Ready in 179ms" then exited with ELIFECYCLE code 1.
+- **Known environmental differences:** VPS Node v22.22.2, local Node v20.18.0. Next.js 16.2.3, new CSP middleware, new dependency versions.
+
 ### Blockers
 
-- None
+- **Production is on OLD code** (c8adb7a / Session 13). Session 16 security fixes NOT deployed.
+  - All 5 dep vulns from pre-Session-16 are live again (Next.js DoS, Vite x3, etc.)
+  - CSP still uses unsafe-inline for scripts
+  - DEFAULT_BARBER_PASSWORD still uses hardcoded "changeme123!" fallback in source
+- **GitHub main has Session 16 code pushed**, last commit `f740a7f` (middleware fix, untested on VPS)
+- **Root cause of VPS crash unidentified.** Cannot safely redeploy until we reproduce or instrument.
+- **VPS .env has `DEFAULT_BARBER_PASSWORD` set** (not rolled back with git reset). Harmless on old code since old code uses `??` fallback.
 
 ### Next Steps (Session 17)
 
-1. VPS infrastructure hardening (automated backups, structured logging)
-2. Deploy Session 16 changes to VPS (after dev verification)
-3. Update seed data to set barber types (commission vs booth-rental)
-4. Client Portal (Phase 2): client auth, portal pages, booking within portal
-5. Loyalty Program (Phase 3): points engine, tiers, rewards, redemption
-6. Memberships & Subscriptions (Phase 4): plans, Stripe subscriptions, visit tracking
-7. Marketing Center (Phase 5): email campaigns, templates, audience engine, tracking
-8. Review 2 borderline images flagged in Session 8
-9. Stripe frontend completion (payment forms)
-10. E2E tests for key flows -- expand from 6 unit tests
+**Priority 1 -- Diagnose VPS crash (before any redeploy):**
+
+1. Clone figaro to `/var/www/figaro-staging/` (or `/tmp/figaro-debug/`) on VPS
+2. Check out main branch (Session 16 code)
+3. Build in isolation
+4. Run `next start` manually (NOT via PM2) on port 3099 or similar to capture actual stack trace
+5. If crash reproduces, extract full error (bypass "ignore-listed frames" with `--stack-trace-limit=1000`)
+6. If NOT reproducible in isolation, the issue is PM2-specific or ecosystem-specific
+7. Common suspects to investigate:
+   - Node 22 + Next.js 16.2.3 known issues (search GitHub issues)
+   - CSP middleware interaction with static page prerendering
+   - Missing NODE_ENV=production (PM2 shows "node env: N/A" -- may need to set explicitly in ecosystem.config.cjs)
+   - Interaction between middleware and existing user sessions (stale Server Action references from old build)
+
+**Priority 2 -- Once root cause identified:**
+
+1. Fix the specific issue
+2. Test fix in staging directory on VPS first (verify `next start` runs clean)
+3. Only then deploy to production
+4. Verify with brief monitoring after deploy
+
+**Priority 3 (blocked until deploy succeeds):**
+
+1. Update seed data to set barber types (commission vs booth-rental)
+2. Client Portal (Phase 2): client auth, portal pages, booking within portal
+3. Loyalty Program (Phase 3): points engine, tiers, rewards, redemption
+4. Memberships & Subscriptions (Phase 4): plans, Stripe subscriptions, visit tracking
+5. Marketing Center (Phase 5): email campaigns, templates, audience engine, tracking
+6. Review 2 borderline images flagged in Session 8
+7. Stripe frontend completion (payment forms)
+8. E2E tests for key flows -- expand from 6 unit tests
+
+**Priority 4 (portfolio-wide, queued):**
+
+1. VPS infrastructure hardening (structured logging, recovery runbooks) -- across all projects
 
 ## Decisions Made
 
@@ -449,3 +489,4 @@
 | 14      | 2026-03-21 | Project map tour. Verified and filled figaro.md project map (all 7 sections). Updated stale ProjectHealth.md, AUDIT.md, project-registry. Created session-end KB sync process.                                                                                                           |
 | 15      | 2026-04-11 | Governance audit. All files updated to Twelve Pillars + Data Protection. 4 vulnerabilities found (1 Next.js, 3 Vite via unpinned Vitest). Vitest pinning drift flagged. SECURITY-AUDIT.md identified as missing.                                                                         |
 | 16      | 2026-04-11 | Security remediation. All dep vulns patched (0 remaining). SECURITY-AUDIT.md created (20/20 sections, B+ rating). 5 findings fixed: default password, CSP nonce, Instagram token, booking race condition, pagination. All quality gates passing.                                          |
+| 16b     | 2026-04-12 | VPS deploy attempted -- FAILED (crash loop). Site down approximately 5-10 minutes. Rolled back to c8adb7a (Session 13 state). Root cause not identified. Middleware canonical fix committed (f740a7f, untested). Production stable on old code. Session 16 code in GitHub not deployed.  |
