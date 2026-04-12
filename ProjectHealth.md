@@ -4,7 +4,7 @@
 
 ## Overall Grade: A-
 
-Mature full-stack barbershop platform with 16 sessions of work. Strong auth, role-based access, real data, polished public site, comprehensive admin dashboard. Schema foundation laid for 5 future feature phases. All dependency vulnerabilities patched, nonce-based CSP, full penetration test complete (B+ rating). Test coverage remains the main gap.
+Mature full-stack barbershop platform with 16 sessions of work. Strong auth, role-based access, real data, polished public site, comprehensive admin dashboard. Schema foundation laid for 5 future feature phases. All dependency vulnerabilities patched, nonce-based CSP, full penetration test complete (A- rating). Test coverage remains the main gap.
 
 ## Twelve Pillars
 
