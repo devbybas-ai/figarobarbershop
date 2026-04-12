@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const search = searchParams.get("search");
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "50", 10)));
 
     const where: Record<string, unknown> = { deletedAt: null };
 
@@ -30,15 +32,20 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    const clients = await db.client.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      include: {
-        _count: { select: { appointments: true } },
-      },
-    });
+    const [clients, total] = await Promise.all([
+      db.client.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        include: {
+          _count: { select: { appointments: true } },
+        },
+        take: limit,
+        skip: (page - 1) * limit,
+      }),
+      db.client.count({ where }),
+    ]);
 
-    return NextResponse.json(clients);
+    return NextResponse.json({ data: clients, total, page, limit });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

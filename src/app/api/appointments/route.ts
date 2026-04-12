@@ -60,28 +60,52 @@ export async function POST(request: NextRequest) {
     }
 
     const totalPrice = services.reduce((sum, s) => sum + Number(s.price), 0);
+    const totalDuration = services.reduce((sum, s) => sum + s.durationMinutes, 0);
+    const scheduledAt = new Date(data.scheduledAt);
+    const scheduledEnd = new Date(scheduledAt.getTime() + totalDuration * 60_000);
 
-    // Create appointment with items
-    const appointment = await db.appointment.create({
-      data: {
-        clientId: client.id,
-        barberId: data.barberId,
-        scheduledAt: new Date(data.scheduledAt),
-        type: data.type,
-        notes: data.notes,
-        totalPrice,
-        items: {
-          create: services.map((s) => ({
-            serviceId: s.id,
-            price: s.price,
-          })),
+    // Create appointment in a transaction with conflict check to prevent double-booking
+    const appointment = await db.$transaction(async (tx) => {
+      // Check for overlapping appointments for this barber
+      const conflict = await tx.appointment.findFirst({
+        where: {
+          barberId: data.barberId,
+          status: { in: ["SCHEDULED", "IN_PROGRESS"] },
+          scheduledAt: { lt: scheduledEnd },
+          // Existing appointment ends after our start
+          AND: {
+            scheduledAt: {
+              gte: new Date(scheduledAt.getTime() - totalDuration * 60_000),
+            },
+          },
         },
-      },
-      include: {
-        client: true,
-        barber: true,
-        items: { include: { service: true } },
-      },
+      });
+
+      if (conflict) {
+        throw new Error("TIME_CONFLICT");
+      }
+
+      return tx.appointment.create({
+        data: {
+          clientId: client.id,
+          barberId: data.barberId,
+          scheduledAt,
+          type: data.type,
+          notes: data.notes,
+          totalPrice,
+          items: {
+            create: services.map((s) => ({
+              serviceId: s.id,
+              price: s.price,
+            })),
+          },
+        },
+        include: {
+          client: true,
+          barber: true,
+          items: { include: { service: true } },
+        },
+      });
     });
 
     return NextResponse.json(appointment, { status: 201 });
@@ -90,6 +114,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Validation failed", details: error.issues },
         { status: 400 },
+      );
+    }
+    if (error instanceof Error && error.message === "TIME_CONFLICT") {
+      return NextResponse.json(
+        { error: "This time slot is no longer available. Please select another time." },
+        { status: 409 },
       );
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -118,6 +148,8 @@ export async function GET(request: NextRequest) {
       where.barberId = barberId;
     }
 
+    const limit = Math.min(200, Math.max(1, parseInt(searchParams.get("limit") ?? "200", 10)));
+
     const appointments = await db.appointment.findMany({
       where,
       include: {
@@ -126,6 +158,7 @@ export async function GET(request: NextRequest) {
         items: { include: { service: true } },
       },
       orderBy: { scheduledAt: "asc" },
+      take: limit,
     });
 
     return NextResponse.json(appointments);

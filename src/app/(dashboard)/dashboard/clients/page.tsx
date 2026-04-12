@@ -32,7 +32,7 @@ export default function ClientsPage() {
     const params = search ? `?search=${encodeURIComponent(search)}` : "";
     fetch(`/api/clients${params}`)
       .then((r) => r.json())
-      .then(setClients)
+      .then((res) => setClients(res.data ?? res))
       .catch(() => setClients([]));
   }
 

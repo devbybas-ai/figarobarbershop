@@ -25,19 +25,6 @@ export const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=31536000; includeSubDomains; preload",
   },
-  {
-    key: "Content-Security-Policy",
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://*.cdninstagram.com https://*.stripe.com",
-      "font-src 'self'",
-      "connect-src 'self' https://api.stripe.com https://graph.instagram.com",
-      "frame-src https://js.stripe.com",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join("; "),
-  },
+  // CSP is now handled per-request in middleware with nonce-based script-src.
+  // Do NOT add a static CSP header here -- it would conflict with the middleware CSP.
 ];

@@ -5,7 +5,13 @@ import { auth } from "@/lib/auth";
 import { hasRole } from "@/lib/auth-utils";
 import { hash } from "bcryptjs";
 
-const DEFAULT_BARBER_PASSWORD = process.env.DEFAULT_BARBER_PASSWORD ?? "changeme123!";
+function getDefaultBarberPassword(): string {
+  const password = process.env.DEFAULT_BARBER_PASSWORD;
+  if (!password) {
+    throw new Error("DEFAULT_BARBER_PASSWORD environment variable is required");
+  }
+  return password;
+}
 
 function ownerOnly(session: { user: { role: string } } | null) {
   if (!session?.user) return { error: "Unauthorized", status: 401 };
@@ -50,7 +56,7 @@ export async function POST(req: Request) {
   }
 
   // Default password from env (owner should tell the barber to change it)
-  const passwordHash = await hash(DEFAULT_BARBER_PASSWORD, 12);
+  const passwordHash = await hash(getDefaultBarberPassword(), 12);
 
   // Create user + barber in a transaction
   const result = await db.$transaction(async (tx) => {
@@ -178,7 +184,8 @@ export async function PATCH(req: Request) {
     updates.barberType = barberType;
   }
   if (boothRentAmount !== undefined) updates.boothRentAmount = boothRentAmount;
-  if (Array.isArray(acceptedPaymentMethods)) updates.acceptedPaymentMethods = acceptedPaymentMethods;
+  if (Array.isArray(acceptedPaymentMethods))
+    updates.acceptedPaymentMethods = acceptedPaymentMethods;
   if (zelleHandle !== undefined) updates.zelleHandle = zelleHandle || null;
   if (cashappHandle !== undefined) updates.cashappHandle = cashappHandle || null;
   if (venmoHandle !== undefined) updates.venmoHandle = venmoHandle || null;

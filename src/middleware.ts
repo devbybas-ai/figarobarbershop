@@ -116,7 +116,27 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // --- CSP with per-request nonce ---
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const csp = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' https://js.stripe.com`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https://*.cdninstagram.com https://*.stripe.com",
+    "font-src 'self'",
+    "connect-src 'self' https://api.stripe.com https://graph.instagram.com",
+    "frame-src https://js.stripe.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+
+  const response = NextResponse.next({
+    headers: { "x-nonce": nonce },
+  });
+  response.headers.set("Content-Security-Policy", csp);
+
+  return response;
 }
 
 export const config = {

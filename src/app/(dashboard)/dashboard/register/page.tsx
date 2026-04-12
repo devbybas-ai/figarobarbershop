@@ -117,7 +117,8 @@ export default function RegisterPage() {
       if (barbersRes.ok) setBarbers(await barbersRes.json());
       if (servicesRes.ok) setServices(await servicesRes.json());
       if (clientsRes.ok) {
-        const clients: Client[] = await clientsRes.json();
+        const res = await clientsRes.json();
+        const clients: Client[] = res.data ?? res;
         // Show clients created in the last 24 hours first (recent intakes)
         setRecentClients(clients);
       }
