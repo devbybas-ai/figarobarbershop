@@ -127,10 +127,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Booth rent calculations
-  const boothRentCollected = boothRentTransactions.reduce(
-    (sum, t) => sum + Number(t.amount),
-    0,
-  );
+  const boothRentCollected = boothRentTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
   const boothRentExpected = barbers
     .filter((b) => b.barberType === "BOOTH_RENTAL" && b.boothRentAmount)
     .reduce((sum, b) => sum + Number(b.boothRentAmount), 0);
@@ -139,7 +136,10 @@ export async function GET(req: NextRequest) {
   const barberArray = Object.values(barberStats)
     .map((bs) => ({
       ...bs,
-      avgTicket: bs.appointmentCount > 0 ? Math.round((bs.grossRevenue / bs.appointmentCount) * 100) / 100 : 0,
+      avgTicket:
+        bs.appointmentCount > 0
+          ? Math.round((bs.grossRevenue / bs.appointmentCount) * 100) / 100
+          : 0,
     }))
     .sort((a, b) => b.grossRevenue - a.grossRevenue);
 

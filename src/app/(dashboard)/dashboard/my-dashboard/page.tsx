@@ -86,7 +86,9 @@ export default function MyDashboardPage() {
           Welcome back, {data.barber.firstName}
         </h1>
         <p className="mt-1 text-sm text-figaro-cream/50">
-          {data.barber.barberType === "BOOTH_RENTAL" ? "Booth Rental" : `Commission (${data.barber.commissionRate}%)`}
+          {data.barber.barberType === "BOOTH_RENTAL"
+            ? "Booth Rental"
+            : `Commission (${data.barber.commissionRate}%)`}
         </p>
       </div>
 
@@ -202,7 +204,9 @@ export default function MyDashboardPage() {
                       ${Number(p.barberCut ?? p.amount).toFixed(0)}
                     </span>
                     {Number(p.tip ?? 0) > 0 && (
-                      <span className="ml-1 text-xs text-figaro-teal">+${Number(p.tip).toFixed(0)} tip</span>
+                      <span className="ml-1 text-xs text-figaro-teal">
+                        +${Number(p.tip).toFixed(0)} tip
+                      </span>
                     )}
                   </div>
                 </div>

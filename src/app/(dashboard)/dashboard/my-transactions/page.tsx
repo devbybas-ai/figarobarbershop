@@ -67,10 +67,7 @@ export default function MyTransactionsPage() {
     (sum, t) => sum + Number(t.barberCut ?? t.amount),
     0,
   );
-  const totalTips = data.transactions.reduce(
-    (sum, t) => sum + Number(t.tip ?? 0),
-    0,
-  );
+  const totalTips = data.transactions.reduce((sum, t) => sum + Number(t.tip ?? 0), 0);
 
   return (
     <div className="space-y-6">
@@ -117,10 +114,7 @@ export default function MyTransactionsPage() {
             </thead>
             <tbody>
               {data.transactions.map((t) => (
-                <tr
-                  key={t.id}
-                  className="border-b border-figaro-cream/5 text-sm last:border-b-0"
-                >
+                <tr key={t.id} className="border-b border-figaro-cream/5 text-sm last:border-b-0">
                   <td className="px-4 py-3 text-figaro-cream/60">
                     {new Date(t.createdAt ?? t.date ?? "").toLocaleDateString([], {
                       month: "short",
@@ -130,7 +124,7 @@ export default function MyTransactionsPage() {
                   <td className="px-4 py-3 text-figaro-cream">
                     {t.appointment
                       ? `${t.appointment.client.firstName} ${t.appointment.client.lastName}`
-                      : t.description ?? t.type ?? "—"}
+                      : (t.description ?? t.type ?? "—")}
                   </td>
                   <td className="px-4 py-3 text-figaro-cream/50">{t.method ?? "—"}</td>
                   <td className="px-4 py-3 text-right text-figaro-cream">

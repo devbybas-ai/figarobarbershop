@@ -70,12 +70,31 @@ export default function RevenuePage() {
       {/* Top-level Stats */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
-          { label: "Gross Revenue", value: `$${data.totals.grossRevenue.toFixed(0)}`, color: "text-figaro-cream" },
-          { label: "Shop Revenue", value: `$${data.totals.shopRevenue.toFixed(0)}`, color: "text-figaro-gold" },
-          { label: "Commissions Owed", value: `$${data.totals.commissionsOwed.toFixed(0)}`, color: "text-figaro-teal" },
-          { label: "Total Tips", value: `$${data.totals.tips.toFixed(0)}`, color: "text-green-400" },
+          {
+            label: "Gross Revenue",
+            value: `$${data.totals.grossRevenue.toFixed(0)}`,
+            color: "text-figaro-cream",
+          },
+          {
+            label: "Shop Revenue",
+            value: `$${data.totals.shopRevenue.toFixed(0)}`,
+            color: "text-figaro-gold",
+          },
+          {
+            label: "Commissions Owed",
+            value: `$${data.totals.commissionsOwed.toFixed(0)}`,
+            color: "text-figaro-teal",
+          },
+          {
+            label: "Total Tips",
+            value: `$${data.totals.tips.toFixed(0)}`,
+            color: "text-green-400",
+          },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-sm border border-figaro-gold/10 bg-figaro-dark p-4">
+          <div
+            key={stat.label}
+            className="rounded-sm border border-figaro-gold/10 bg-figaro-dark p-4"
+          >
             <p className="text-xs text-figaro-cream/50">{stat.label}</p>
             <p className={`mt-1 text-2xl font-bold ${stat.color}`}>{stat.value}</p>
           </div>
@@ -89,11 +108,19 @@ export default function RevenuePage() {
           <div className="mt-2 flex gap-8 text-sm">
             <div>
               <span className="text-figaro-cream/50">Expected: </span>
-              <span className="text-figaro-cream">${data.totals.boothRentExpected.toFixed(0)}/mo</span>
+              <span className="text-figaro-cream">
+                ${data.totals.boothRentExpected.toFixed(0)}/mo
+              </span>
             </div>
             <div>
               <span className="text-figaro-cream/50">Collected: </span>
-              <span className={data.totals.boothRentCollected >= data.totals.boothRentExpected ? "text-green-400" : "text-yellow-400"}>
+              <span
+                className={
+                  data.totals.boothRentCollected >= data.totals.boothRentExpected
+                    ? "text-green-400"
+                    : "text-yellow-400"
+                }
+              >
                 ${data.totals.boothRentCollected.toFixed(0)}
               </span>
             </div>
@@ -156,14 +183,22 @@ export default function RevenuePage() {
                       {b.type === "BOOTH_RENTAL" ? "Booth" : "Commission"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-figaro-cream/60">{b.appointmentCount}</td>
-                  <td className="px-4 py-3 text-right text-figaro-cream">${b.grossRevenue.toFixed(0)}</td>
+                  <td className="px-4 py-3 text-right text-figaro-cream/60">
+                    {b.appointmentCount}
+                  </td>
+                  <td className="px-4 py-3 text-right text-figaro-cream">
+                    ${b.grossRevenue.toFixed(0)}
+                  </td>
                   <td className="px-4 py-3 text-right text-figaro-gold">${b.shopCut.toFixed(0)}</td>
-                  <td className="px-4 py-3 text-right text-figaro-teal">${b.barberCut.toFixed(0)}</td>
+                  <td className="px-4 py-3 text-right text-figaro-teal">
+                    ${b.barberCut.toFixed(0)}
+                  </td>
                   <td className="px-4 py-3 text-right text-green-400">
                     {b.tips > 0 ? `$${b.tips.toFixed(0)}` : "—"}
                   </td>
-                  <td className="px-4 py-3 text-right text-figaro-cream/50">${b.avgTicket.toFixed(0)}</td>
+                  <td className="px-4 py-3 text-right text-figaro-cream/50">
+                    ${b.avgTicket.toFixed(0)}
+                  </td>
                 </tr>
               ))}
             </tbody>

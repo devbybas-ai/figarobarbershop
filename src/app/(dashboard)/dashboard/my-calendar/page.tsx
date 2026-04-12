@@ -28,9 +28,7 @@ export default function MyCalendarPage() {
   const { data: session } = useSession();
   const [data, setData] = useState<CalendarData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().slice(0, 10),
-  );
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [barberSlug, setBarberSlug] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,7 +55,9 @@ export default function MyCalendarPage() {
       .catch(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [barberSlug, selectedDate]);
 
   const changeDate = (offset: number) => {
@@ -119,8 +119,8 @@ export default function MyCalendarPage() {
             <p className="text-sm text-figaro-cream/40">Day off</p>
           ) : (
             <p className="text-sm text-figaro-cream/60">
-              Working hours: <span className="text-figaro-cream">{todaySchedule.startTime}</span> &ndash;{" "}
-              <span className="text-figaro-cream">{todaySchedule.endTime}</span>
+              Working hours: <span className="text-figaro-cream">{todaySchedule.startTime}</span>{" "}
+              &ndash; <span className="text-figaro-cream">{todaySchedule.endTime}</span>
             </p>
           )}
         </div>
@@ -137,10 +137,7 @@ export default function MyCalendarPage() {
       ) : (
         <div className="space-y-2">
           {data.appointments.map((appt) => {
-            const totalDuration = appt.items.reduce(
-              (sum, i) => sum + i.service.durationMinutes,
-              0,
-            );
+            const totalDuration = appt.items.reduce((sum, i) => sum + i.service.durationMinutes, 0);
             return (
               <div
                 key={appt.id}
@@ -152,8 +149,7 @@ export default function MyCalendarPage() {
                       {appt.client.firstName} {appt.client.lastName}
                     </p>
                     <p className="mt-0.5 text-xs text-figaro-cream/50">
-                      {appt.items.map((i) => i.service.name).join(", ")} &middot;{" "}
-                      {totalDuration}min
+                      {appt.items.map((i) => i.service.name).join(", ")} &middot; {totalDuration}min
                     </p>
                   </div>
                   <div className="text-right">
@@ -179,9 +175,7 @@ export default function MyCalendarPage() {
                     <span>${Number(appt.payment.amount).toFixed(0)}</span>
                     <span
                       className={
-                        appt.payment.status === "COMPLETED"
-                          ? "text-green-400"
-                          : "text-yellow-400"
+                        appt.payment.status === "COMPLETED" ? "text-green-400" : "text-yellow-400"
                       }
                     >
                       {appt.payment.status}
